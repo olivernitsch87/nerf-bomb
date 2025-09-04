@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nerf Bombenentschärfung</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #111;
+      color: #fff;
+      transition: background-color 0.2s;
+    }
+    body.flash {
+      background-color: #300;
+    }
+    button, input {
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+      font-size: 1.5rem;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #444;
+      color: white;
+    }
+    .countdown {
+      font-size: 4rem;
+      margin-top: 2rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    .progress-bar {
+      width: 60%;
+      height: 20px;
+      background-color: #555;
+      margin: 1rem auto;
+      border-radius: 10px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background-color: limegreen;
+      transition: width 0.05s linear;
+    }
+    .warning {
+      color: red;
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Bombe entschärfen</h1>
+
+  <label>
+    Haltezeit (Sekunden):
+    <input type="number" id="holdTimeInput" value="5" min="1" max="30">
+  </label>
+  <label>
+    Countdown-Länge (Sekunden):
+    <input type="number" id="countdownInput" value="45" min="10" max="300">
+  </label>
+
+  <button id="armButton">Bombe scharf machen (Team A)</button>
+  <button id="defuseButton">Bombe entschärfen (Team B)</button>
+  <div class="progress-bar"><div class="progress" id="progress"></div></div>
+  <div class="countdown" id="timerDisplay"></div>
+
+  <audio id="beep" src="beep_short.ogg"></audio>
+  <audio id="explosion" src="explosion.mp3"></audio>
+
+  <script>
+    const armButton = document.getElementById("armButton");
+    const defuseButton = document.getElementById("defuseButton");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const beep = document.getElementById("beep");
+    const explosion = document.getElementById("explosion");
+    const holdTimeInput = document.getElementById("holdTimeInput");
+    const countdownInput = document.getElementById("countdownInput");
+    const progressBar = document.querySelector(".progress-bar");
+    const progress = document.getElementById("progress");
+    const body = document.body;
+
+    let holdInterval;
+    let countdownTimer;
+    let beepTimer;
+    let countdown = 0;
+
+    function reset() {
+      clearInterval(countdownTimer);
+      clearTimeout(beepTimer);
+      timerDisplay.textContent = "";
+      timerDisplay.classList.remove("warning");
+      body.classList.remove("flash");
+    }
+
+    function startCountdown() {
+      holdTimeInput.disabled = true;
+      countdownInput.disabled = true;
+      reset();
+      countdown = parseInt(countdownInput.value, 10);
+      timerDisplay.textContent = countdown;
+
+      countdownTimer = setInterval(() => {
+        countdown--;
+        timerDisplay.textContent = countdown;
+        if (countdown <= 10) {
+          timerDisplay.classList.add("warning");
+        }
+        if (countdown <= 5) {
+          flashBackground();
+        }
+        if (countdown <= 0) {
+          clearInterval(countdownTimer);
+          clearTimeout(beepTimer);
+          timerDisplay.textContent = "💥 BOOM!";
+          explosion.play();
+        }
+      }, 1000);
+
+      adaptiveBeep();
+    }
+
+    function adaptiveBeep() {
+      function getBeepDelay(t) {
+        if (t <= 5) return 200;
+        if (t <= 10) return 500;
+        if (t <= 20) return 1000;
+        return 3000;
+      }
+
+      function beepLoop() {
+        if (countdown <= 0) return;
+        beep.currentTime = 0;
+        beep.play();
+        const delay = getBeepDelay(countdown);
+        beepTimer = setTimeout(beepLoop, delay);
+      }
+
+      beepLoop();
+    }
+
+    function flashBackground() {
+      body.classList.add("flash");
+      setTimeout(() => body.classList.remove("flash"), 100);
+    }
+
+    function holdButton(btn, callback) {
+      const startHold = () => {
+        const duration = parseInt(holdTimeInput.value, 10) * 1000;
+        let holdStart = Date.now();
+        progressBar.style.display = "block";
+        progress.style.width = "0%";
+        holdInterval = setInterval(() => {
+          const held = Date.now() - holdStart;
+          const percent = Math.min(100, (held / duration) * 100);
+          progress.style.width = percent + "%";
+          if (held >= duration) {
+            clearInterval(holdInterval);
+            progressBar.style.display = "none";
+            callback();
+          }
+        }, 50);
+      };
+
+      const cancelHold = () => {
+        clearInterval(holdInterval);
+        progress.style.width = "0%";
+        progressBar.style.display = "none";
+      };
+
+      btn.addEventListener("mousedown", startHold);
+      btn.addEventListener("mouseup", cancelHold);
+      btn.addEventListener("mouseleave", cancelHold);
+      btn.addEventListener("touchstart", startHold);
+      btn.addEventListener("touchend", cancelHold);
+      btn.addEventListener("touchcancel", cancelHold);
+    }
+
+    holdButton(armButton, () => {
+      startCountdown();
+    });
+
+    holdButton(defuseButton, () => {
+      holdTimeInput.disabled = false;
+      countdownInput.disabled = false;
+      clearInterval(countdownTimer);
+      clearTimeout(beepTimer);
+      timerDisplay.textContent = "✅ Entschärft!";
+      timerDisplay.classList.remove("warning");
+      body.classList.remove("flash");
+    });
+  </script>
+</body>
+</html>
