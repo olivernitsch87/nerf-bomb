@@ -7,25 +7,38 @@
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <h1>Bombe entschärfen</h1>
+  <header class="top-bar">
+    <h1>Nerf Bombe</h1>
+    <div class="top-buttons">
+      <button id="fullscreenButton" class="icon-button">⛶ Vollbild</button>
+      <button id="settingsToggle" class="icon-button">⚙️ Einstellungen</button>
+    </div>
+  </header>
 
-  <label>
-    Haltezeit (Sekunden):
-    <input type="number" id="holdTimeInput" value="5" min="1" max="30">
-  </label>
-  <label>
-    Countdown-Länge (Sekunden):
-    <input type="number" id="countdownInput" value="45" min="10" max="300">
-  </label>
+  <section id="settingsPanel" class="settings hidden">
+    <h2>Einstellungen</h2>
+    <label>
+      Haltezeit (Sekunden):
+      <input type="number" id="holdTimeInput" value="5" min="1" max="30">
+    </label>
+    <label>
+      Countdown-Länge (Sekunden):
+      <input type="number" id="countdownInput" value="45" min="10" max="300">
+    </label>
+  </section>
 
-  <button id="armButton">Bombe scharf machen (Team A)</button>
-  <button id="defuseButton" class="hidden">Bombe entschärfen (Team B)</button>
+  <main>
+    <div class="button-row">
+      <button id="armButton">Team A – Bombe scharf machen</button>
+      <button id="defuseButton" class="hidden">Team B – Bombe entschärfen</button>
+    </div>
 
-  <div class="progress-bar">
-    <div class="progress" id="progress"></div>
-  </div>
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
 
-  <div class="countdown" id="timerDisplay"></div>
+    <div class="countdown" id="timerDisplay"></div>
+  </main>
 
   <audio id="beep" src="assets/beep_short.ogg"></audio>
   <audio id="explosion" src="assets/explosion.mp3"></audio>
@@ -33,4 +46,3 @@
   <script src="assets/script.js" defer></script>
 </body>
 </html>
-
