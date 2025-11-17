@@ -1,1 +1,65 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #111;
+  color: #fff;
+  transition: background-color 0.2s;
+}
+
+body.flash {
+  background-color: #300;
+}
+
+button,
+input {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #444;
+  color: white;
+}
+
+.countdown {
+  font-size: 4rem;
+  margin-top: 2rem;
+}
+
+label {
+  display: block;
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  width: 60%;
+  height: 20px;
+  background-color: #555;
+  margin: 1rem auto;
+  border-radius: 10px;
+  overflow: hidden;
+  display: none;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background-color: limegreen;
+  transition: width 0.05s linear;
+}
+
+.warning {
+  color: red;
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 
