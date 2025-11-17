@@ -55,11 +55,12 @@ function startCountdown() {
       flashBackground();
     }
     if (countdown <= 0) {
-      clearInterval(countdownTimer);
-      clearTimeout(beepTimer);
-      timerDisplay.textContent = "💥 BOOM!";
-      explosion.play();
-    }
+  clearInterval(countdownTimer);
+  clearTimeout(beepTimer);
+  timerDisplay.textContent = "💥 BOOM!";
+  explosion.play();
+  setInitialState(); // Eingangsstatus nach Explosion
+}
   }, 1000);
 
   adaptiveBeep();
@@ -122,16 +123,16 @@ function holdButton(btn, callback) {
 }
 
 holdButton(armButton, () => {
+  showDefuseHideArm();  // Team B sichtbar machen
   startCountdown();
 });
 
 holdButton(defuseButton, () => {
-  holdTimeInput.disabled = false;
-  countdownInput.disabled = false;
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
   timerDisplay.textContent = "✅ Entschärft!";
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
+  setInitialState(); // Eingangsstatus wiederherstellen
 });
 
