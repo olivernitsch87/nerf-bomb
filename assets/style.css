@@ -23,6 +23,29 @@ input {
   border-radius: 8px;
   background-color: #444;
   color: white;
+  cursor: pointer;
+}
+
+/* sicht-/unsichtbar */
+.hidden {
+  display: none;
+}
+
+/* spezielle Farben für die Buttons */
+#armButton {
+  background-color: #f97316; /* orange */
+}
+
+#armButton:hover {
+  background-color: #ea580c;
+}
+
+#defuseButton {
+  background-color: #22c55e; /* grün */
+}
+
+#defuseButton:hover {
+  background-color: #16a34a;
 }
 
 .countdown {
