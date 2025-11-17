@@ -9,10 +9,31 @@ const progressBar = document.querySelector(".progress-bar");
 const progress = document.getElementById("progress");
 const body = document.body;
 
+const settingsToggle = document.getElementById("settingsToggle");
+const settingsPanel = document.getElementById("settingsPanel");
+const fullscreenButton = document.getElementById("fullscreenButton");
+
 let holdInterval;
 let countdownTimer;
 let beepTimer;
 let countdown = 0;
+
+/* Hilfsfunktionen */
+
+function vibrate(pattern) {
+  if (navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+function reset() {
+  clearInterval(countdownTimer);
+  clearTimeout(beepTimer);
+  timerDisplay.textContent = "";
+  timerDisplay.classList.remove("warning");
+  body.classList.remove("flash");
+  body.classList.remove("explosion");
+}
 
 function showArmHideDefuse() {
   armButton.classList.remove("hidden");
@@ -30,13 +51,7 @@ function setInitialState() {
   showArmHideDefuse();
 }
 
-function reset() {
-  clearInterval(countdownTimer);
-  clearTimeout(beepTimer);
-  timerDisplay.textContent = "";
-  timerDisplay.classList.remove("warning");
-  body.classList.remove("flash");
-}
+/* Countdown & Sounds */
 
 function startCountdown() {
   holdTimeInput.disabled = true;
@@ -51,16 +66,22 @@ function startCountdown() {
     if (countdown <= 10) {
       timerDisplay.classList.add("warning");
     }
-    if (countdown <= 5) {
+    if (countdown <= 5 && countdown > 0) {
       flashBackground();
     }
     if (countdown <= 0) {
-  clearInterval(countdownTimer);
-  clearTimeout(beepTimer);
-  timerDisplay.textContent = "💥 BOOM!";
-  explosion.play();
-  setInitialState(); // Eingangsstatus nach Explosion
-}
+      clearInterval(countdownTimer);
+      clearTimeout(beepTimer);
+      timerDisplay.textContent = "💥 BOOM!";
+      explosion.currentTime = 0;
+      explosion.play();
+      body.classList.add("explosion");
+      vibrate([300, 100, 300]);
+      setInitialState();
+      setTimeout(() => {
+        body.classList.remove("explosion");
+      }, 600);
+    }
   }, 1000);
 
   adaptiveBeep();
@@ -89,6 +110,8 @@ function flashBackground() {
   body.classList.add("flash");
   setTimeout(() => body.classList.remove("flash"), 100);
 }
+
+/* Halte-Logik für Buttons */
 
 function holdButton(btn, callback) {
   const startHold = () => {
@@ -122,9 +145,12 @@ function holdButton(btn, callback) {
   btn.addEventListener("touchcancel", cancelHold);
 }
 
+/* Button-Aktionen */
+
 holdButton(armButton, () => {
-  showDefuseHideArm();  // Team B sichtbar machen
+  showDefuseHideArm();
   startCountdown();
+  vibrate(200); // kurzes Feedback bei scharf
 });
 
 holdButton(defuseButton, () => {
@@ -133,6 +159,32 @@ holdButton(defuseButton, () => {
   timerDisplay.textContent = "✅ Entschärft!";
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
-  setInitialState(); // Eingangsstatus wiederherstellen
+  vibrate([100, 50, 100]); // doppel-Vibration bei Entschärfen
+  setInitialState();
 });
 
+/* Einstellungen ein-/ausblenden */
+
+settingsToggle.addEventListener("click", () => {
+  settingsPanel.classList.toggle("hidden");
+});
+
+/* Vollbildmodus */
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+fullscreenButton.addEventListener("click", toggleFullscreen);
+
+/* Initialer Zustand beim Laden */
+
+setInitialState();
