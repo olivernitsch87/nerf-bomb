@@ -1,8 +1,13 @@
+/* Grundlayout */
+
 body {
   font-family: sans-serif;
-  text-align: center;
   background-color: #111;
   color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   transition: background-color 0.2s;
 }
 
@@ -10,28 +15,131 @@ body.flash {
   background-color: #300;
 }
 
-button,
+/* Vollbild-Explosionseffekt */
+
+body.explosion {
+  background-color: #700;
+}
+
+/* Top-Bar */
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: #181818;
+  border-bottom: 1px solid #333;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.top-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background-color: #444;
+}
+
+/* Einstellungen */
+
+.settings {
+  padding: 0.75rem 1rem 0.5rem;
+  background-color: #181818;
+  border-bottom: 1px solid #333;
+}
+
+.settings h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
 input {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
   touch-action: manipulation;
-  font-size: 1.5rem;
-  padding: 0.5rem 1rem;
-  margin: 0.5rem;
+  font-size: 1.1rem;
+  padding: 0.3rem 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: #fff;
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Hauptbereich */
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Buttons für Team A/B */
+
+.button-row {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+button {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  font-size: 1.4rem;
+  padding: 1rem 2.2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   background-color: #444;
   color: white;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* sicht-/unsichtbar */
+
 .hidden {
   display: none;
 }
 
 /* spezielle Farben für die Buttons */
+
 #armButton {
   background-color: #f97316; /* orange */
 }
@@ -48,22 +156,20 @@ input {
   background-color: #16a34a;
 }
 
+/* Countdown und Progress */
+
 .countdown {
   font-size: 4rem;
   margin-top: 2rem;
 }
 
-label {
-  display: block;
-  margin-top: 1rem;
-}
-
 .progress-bar {
-  width: 60%;
-  height: 20px;
+  width: 80%;
+  max-width: 500px;
+  height: 24px;
   background-color: #555;
-  margin: 1rem auto;
-  border-radius: 10px;
+  margin: 1.5rem auto 0;
+  border-radius: 12px;
   overflow: hidden;
   display: none;
 }
@@ -75,6 +181,8 @@ label {
   transition: width 0.05s linear;
 }
 
+/* Warnung bei wenig Zeit */
+
 .warning {
   color: red;
   animation: blink 1s step-start infinite;
@@ -83,5 +191,22 @@ label {
 @keyframes blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* Responsive für Tablets / Smartphones */
+
+@media (max-width: 600px) {
+  .top-bar h1 {
+    font-size: 1.2rem;
+  }
+
+  button {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .countdown {
+    font-size: 3rem;
   }
 }
