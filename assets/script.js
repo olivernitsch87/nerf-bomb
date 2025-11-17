@@ -14,6 +14,22 @@ let countdownTimer;
 let beepTimer;
 let countdown = 0;
 
+function showArmHideDefuse() {
+  armButton.classList.remove("hidden");
+  defuseButton.classList.add("hidden");
+}
+
+function showDefuseHideArm() {
+  armButton.classList.add("hidden");
+  defuseButton.classList.remove("hidden");
+}
+
+function setInitialState() {
+  holdTimeInput.disabled = false;
+  countdownInput.disabled = false;
+  showArmHideDefuse();
+}
+
 function reset() {
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
