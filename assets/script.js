@@ -148,6 +148,7 @@ function holdButton(btn, callback) {
 /* Button-Aktionen */
 
 holdButton(armButton, () => {
+  vibrate(200); // direkt beim Scharfmachen
   showDefuseHideArm();
   startCountdown();
   vibrate(200); // kurzes Feedback bei scharf
