@@ -184,11 +184,11 @@ if (localStorage.getItem("countdownTime")) {
 }
 
 /* Einstellungen speichern bei Änderung */
-holdTimeInput.addEventListener("change", () => {
+holdTimeInput.addEventListener("input", () => {
   localStorage.setItem("holdTime", holdTimeInput.value);
 });
 
-countdownInput.addEventListener("change", () => {
+countdownInput.addEventListener("input", () => {
   localStorage.setItem("countdownTime", countdownInput.value);
 });
 
