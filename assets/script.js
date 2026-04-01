@@ -3,6 +3,8 @@ const defuseButton = document.getElementById("defuseButton");
 const timerDisplay = document.getElementById("timerDisplay");
 const beep = document.getElementById("beep");
 const explosion = document.getElementById("explosion");
+const planted = document.getElementById("planted");
+const defused = document.getElementById("defused");
 const holdTimeInput = document.getElementById("holdTimeInput");
 const countdownInput = document.getElementById("countdownInput");
 const progressBar = document.querySelector(".progress-bar");
@@ -84,6 +86,9 @@ function startCountdown() {
     }
   }, 1000);
 
+  // planted.mp3 und Countdown-Beep gleichzeitig starten
+  planted.currentTime = 0;
+  planted.play();
   adaptiveBeep();
 }
 
@@ -114,7 +119,14 @@ function flashBackground() {
 /* Halte-Logik für Buttons */
 
 function holdButton(btn, callback) {
+  const onFirstTouch = () => {
+    beep.currentTime = 0;
+    beep.play();
+    vibrate(50);
+  };
+
   const startHold = () => {
+    onFirstTouch();
     const duration = parseInt(holdTimeInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
@@ -148,10 +160,9 @@ function holdButton(btn, callback) {
 /* Button-Aktionen */
 
 holdButton(armButton, () => {
-  vibrate(200); // direkt beim Scharfmachen
+  vibrate(200);
   showDefuseHideArm();
   startCountdown();
-  vibrate(200); // kurzes Feedback bei scharf
 });
 
 holdButton(defuseButton, () => {
@@ -160,7 +171,9 @@ holdButton(defuseButton, () => {
   timerDisplay.textContent = "✅ Entschärft!";
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
-  vibrate([100, 50, 100]); // doppel-Vibration bei Entschärfen
+  defused.currentTime = 0;
+  defused.play();
+  vibrate([100, 50, 100]);
   setInitialState();
 });
 
