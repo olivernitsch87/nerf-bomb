@@ -83,6 +83,7 @@ function startCountdown() {
       explosion.play();
       body.classList.add("explosion");
       setTimeout(() => body.classList.remove("explosion"), 600);
+      defuseButton.classList.add("hidden");
       resetButton.classList.remove("hidden"); // Reset-Button einblenden
     }
   }, 1000);
