@@ -132,16 +132,22 @@ function holdButton(btn, callback) {
     let holdStart = Date.now();
     progressBar.style.display = "block";
     progress.style.width = "0%";
-    holdInterval = setInterval(() => {
-      const held = Date.now() - holdStart;
-      const percent = Math.min(100, (held / duration) * 100);
-      progress.style.width = percent + "%";
-      if (held >= duration) {
-        clearInterval(holdInterval);
-        progressBar.style.display = "none";
-        callback();
-      }
-    }, 50);
+  holdInterval = setInterval(() => {
+  if (!bombActive && btn === defuseButton) {
+    clearInterval(holdInterval);
+    progressBar.style.display = "none";
+    progress.style.width = "0%";
+    return;
+  }
+  const held = Date.now() - holdStart;
+  const percent = Math.min(100, (held / duration) * 100);
+  progress.style.width = percent + "%";
+  if (held >= duration) {
+    clearInterval(holdInterval);
+    progressBar.style.display = "none";
+    callback();
+  }
+}, 50);
   };
 
   const cancelHold = () => {
