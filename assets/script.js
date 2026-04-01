@@ -19,6 +19,7 @@ let holdInterval;
 let countdownTimer;
 let beepTimer;
 let countdown = 0;
+let bombActive = false;
 
 /* Hilfsfunktionen */
 
@@ -58,6 +59,7 @@ function setInitialState() {
 function startCountdown() {
   holdTimeInput.disabled = true;
   countdownInput.disabled = true;
+  bombActive = true;
   reset();
   countdown = parseInt(countdownInput.value, 10);
   timerDisplay.textContent = countdown;
@@ -72,6 +74,7 @@ function startCountdown() {
       flashBackground();
     }
     if (countdown <= 0) {
+      bombActive = false;
       clearInterval(countdownTimer);
       clearTimeout(beepTimer);
       timerDisplay.textContent = "💥 BOOM!";
@@ -164,6 +167,7 @@ holdButton(armButton, () => {
 });
 
 holdButton(defuseButton, () => {
+  if (!bombActive) return; // Explosion bereits passiert
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
   timerDisplay.textContent = "✅ Entschärft!";
