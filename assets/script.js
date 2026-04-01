@@ -175,6 +175,23 @@ holdButton(defuseButton, () => {
   setInitialState();
 });
 
+/* Einstellungen laden */
+if (localStorage.getItem("holdTime")) {
+  holdTimeInput.value = localStorage.getItem("holdTime");
+}
+if (localStorage.getItem("countdownTime")) {
+  countdownInput.value = localStorage.getItem("countdownTime");
+}
+
+/* Einstellungen speichern bei Änderung */
+holdTimeInput.addEventListener("change", () => {
+  localStorage.setItem("holdTime", holdTimeInput.value);
+});
+
+countdownInput.addEventListener("change", () => {
+  localStorage.setItem("countdownTime", countdownInput.value);
+});
+
 /* Einstellungen ein-/ausblenden */
 
 settingsToggle.addEventListener("click", () => {
