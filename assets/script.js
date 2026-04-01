@@ -163,6 +163,7 @@ function holdButton(btn, callback) {
   btn.addEventListener("touchstart", startHold);
   btn.addEventListener("touchend", cancelHold);
   btn.addEventListener("touchcancel", cancelHold);
+  btn.addEventListener("contextmenu", (e) => e.preventDefault());
 }
 
 /* Button-Aktionen */
