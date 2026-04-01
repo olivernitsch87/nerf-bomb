@@ -135,10 +135,19 @@ button {
 /* sicht-/unsichtbar */
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 /* spezielle Farben für die Buttons */
+
+#resetButton {
+  margin-top: 1.5rem;
+  background-color: #3b82f6;
+  font-size: 1.2rem;
+}
+#resetButton:hover {
+  background-color: #2563eb;
+}
 
 #armButton {
   background-color: #f97316; /* orange */
