@@ -10,10 +10,10 @@ const countdownInput = document.getElementById("countdownInput");
 const progressBar = document.querySelector(".progress-bar");
 const progress = document.getElementById("progress");
 const body = document.body;
-
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
 const fullscreenButton = document.getElementById("fullscreenButton");
+const resetButton = document.getElementById("resetButton");
 
 let holdInterval;
 let countdownTimer;
@@ -75,14 +75,12 @@ function startCountdown() {
       clearInterval(countdownTimer);
       clearTimeout(beepTimer);
       timerDisplay.textContent = "💥 BOOM!";
+      timerDisplay.classList.add("warning"); // bleibt blinkend
       explosion.currentTime = 0;
       explosion.play();
       body.classList.add("explosion");
-      vibrate([300, 100, 300]);
-      setInitialState();
-      setTimeout(() => {
-        body.classList.remove("explosion");
-      }, 600);
+      setTimeout(() => body.classList.remove("explosion"), 600);
+      resetButton.classList.remove("hidden"); // Reset-Button einblenden
     }
   }, 1000);
 
@@ -202,3 +200,12 @@ fullscreenButton.addEventListener("click", toggleFullscreen);
 /* Initialer Zustand beim Laden */
 
 setInitialState();
+
+resetButton.addEventListener("click", () => {
+  reset();
+  timerDisplay.classList.remove("warning");
+  resetButton.classList.add("hidden");
+  showArmHideDefuse();
+  holdTimeInput.disabled = false;
+  countdownInput.disabled = false;
+});
