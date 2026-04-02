@@ -1,4 +1,3 @@
-document.getElementById("debug").textContent = "Script geladen! defuseButton: " + (document.getElementById("defuseButton") ? "OK" : "NULL");
 const armButton = document.getElementById("armButton");
 const defuseButton = document.getElementById("defuseButton");
 const timerDisplay = document.getElementById("timerDisplay");
@@ -18,8 +17,6 @@ const resetButton = document.getElementById("resetButton");
 
 let holdInterval;
 let animateInterval;
-let defuseAnim = null;
-let defuseShake = null;
 let countdownTimer;
 let beepTimer;
 let countdown = 0;
@@ -43,14 +40,11 @@ function reset() {
 }
 
 function showArmHideDefuse() {
-  armButton.classList.remove("hidden");
   document.getElementById("armPanel").classList.remove("hidden");
   document.getElementById("defusePanel").classList.add("hidden");
-  defuseButton.classList.add("hidden");
 }
 
 function showDefuseHideArm() {
-  armButton.classList.add("hidden");
   document.getElementById("armPanel").classList.add("hidden");
   document.getElementById("defusePanel").classList.remove("hidden");
 }
@@ -127,10 +121,9 @@ function flashBackground() {
 
 /* Numpad-Animation */
 
-function animateNumpad() {
-  const display = document.getElementById("numpadDisplay");
+function animateNumpad(displayId, codes) {
+  const display = document.getElementById(displayId);
   if (!display) return;
-  const codes = ["4", "2", "7", "1", "9"];
   const blanks = ["_", "_", "_", "_", "_"];
   let i = 0;
   display.textContent = "_ _ _ _ _";
@@ -145,95 +138,6 @@ function animateNumpad() {
   }, 300);
 }
 
-/* Defuse-Animation */
-
-function resetDefuseAnimation() {
-  clearInterval(defuseAnim);
-  clearInterval(defuseShake);
-  const pliers = document.getElementById("pliers");
-  const redLeft = document.getElementById("redLeft");
-  const redRight = document.getElementById("redRight");
-  const blueLeft = document.getElementById("blueLeft");
-  const blueRight = document.getElementById("blueRight");
-  const cutRedMask = document.getElementById("cutRedMask");
-  const cutBlueMask = document.getElementById("cutBlueMask");
-  if (!pliers) return;
-  pliers.setAttribute("transform", "translate(290, 105)");
-  redLeft.setAttribute("x2", "140"); redRight.setAttribute("x1", "140");
-  blueLeft.setAttribute("x2", "185"); blueRight.setAttribute("x1", "185");
-  redLeft.setAttribute("stroke", "#e53935"); redRight.setAttribute("stroke", "#e53935");
-  blueLeft.setAttribute("stroke", "#1e88e5"); blueRight.setAttribute("stroke", "#1e88e5");
-  cutRedMask.setAttribute("opacity", "0");
-  cutBlueMask.setAttribute("opacity", "0");
-}
-
-function startDefuseAnimation(onComplete) {
-  resetDefuseAnimation();
-  const pliers = document.getElementById("pliers");
-  const redLeft = document.getElementById("redLeft");
-  const redRight = document.getElementById("redRight");
-  const blueLeft = document.getElementById("blueLeft");
-  const blueRight = document.getElementById("blueRight");
-  const cutRedMask = document.getElementById("cutRedMask");
-  const cutBlueMask = document.getElementById("cutBlueMask");
-
-  function getCurrentX() {
-    const t = pliers.getAttribute("transform");
-    return parseFloat(t.match(/translate\(([^,]+)/)[1]);
-  }
-
-  function moveTo(targetX, targetY, cb) {
-    defuseAnim = setInterval(() => {
-      let cur = getCurrentX();
-      cur -= 5;
-      if (cur <= targetX) {
-        cur = targetX;
-        clearInterval(defuseAnim);
-        pliers.setAttribute("transform", `translate(${cur}, ${targetY})`);
-        cb();
-      } else {
-        pliers.setAttribute("transform", `translate(${cur}, ${targetY})`);
-      }
-    }, 20);
-  }
-
-  function shake(x, y, cb) {
-    let tick = 0;
-    defuseShake = setInterval(() => {
-      tick++;
-      const off = tick % 2 === 0 ? 3 : -3;
-      pliers.setAttribute("transform", `translate(${x + off}, ${y})`);
-      if (tick >= 8) {
-        clearInterval(defuseShake);
-        pliers.setAttribute("transform", `translate(${x}, ${y})`);
-        cb();
-      }
-    }, 70);
-  }
-
-  moveTo(140, 106, () => {
-    shake(140, 106, () => {
-      redLeft.setAttribute("x2", "132");
-      redRight.setAttribute("x1", "148");
-      redLeft.setAttribute("stroke", "#ff8888");
-      redRight.setAttribute("stroke", "#ff8888");
-      cutRedMask.setAttribute("opacity", "1");
-      setTimeout(() => {
-        moveTo(185, 104, () => {
-          shake(185, 104, () => {
-            blueLeft.setAttribute("x2", "177");
-            blueRight.setAttribute("x1", "193");
-            blueLeft.setAttribute("stroke", "#88bbff");
-            blueRight.setAttribute("stroke", "#88bbff");
-            cutBlueMask.setAttribute("opacity", "1");
-            setTimeout(() => onComplete(), 300);
-          });
-        });
-      }, 300);
-    });
-  });
-}
-
 /* Halte-Logik für Buttons */
 
 function holdButton(btn, callback) {
@@ -245,7 +149,8 @@ function holdButton(btn, callback) {
 
   const startHold = () => {
     onFirstTouch();
-    if (btn === armButton) animateNumpad();
+    if (btn === armButton) animateNumpad("numpadDisplay", ["4","2","7","1","9"]);
+    if (btn === defuseButton) animateNumpad("defuseDisplay", ["3","8","5","2","1"]);
     const duration = parseInt(holdTimeInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
@@ -272,6 +177,7 @@ function holdButton(btn, callback) {
     clearInterval(holdInterval);
     clearInterval(animateInterval);
     document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
+    document.getElementById("defuseDisplay").textContent = "_ _ _ _ _";
     progress.style.width = "0%";
     progressBar.style.display = "none";
   };
@@ -300,14 +206,12 @@ holdButton(defuseButton, () => {
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
   bombActive = false;
-  startDefuseAnimation(() => {
-    timerDisplay.textContent = "✅ Entschärft!";
-    defused.currentTime = 0;
-    defused.play();
-    vibrate([100, 50, 100]);
-    document.getElementById("defusePanel").classList.add("hidden");
-    resetButton.classList.remove("hidden");
-  });
+  timerDisplay.textContent = "✅ Entschärft!";
+  defused.currentTime = 0;
+  defused.play();
+  vibrate([100, 50, 100]);
+  document.getElementById("defusePanel").classList.add("hidden");
+  resetButton.classList.remove("hidden");
 });
 
 /* Einstellungen laden */
@@ -352,11 +256,11 @@ setInitialState();
 
 resetButton.addEventListener("click", () => {
   reset();
-  resetDefuseAnimation();
   timerDisplay.classList.remove("warning");
   resetButton.classList.add("hidden");
   showArmHideDefuse();
   holdTimeInput.disabled = false;
   countdownInput.disabled = false;
   document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
+  document.getElementById("defuseDisplay").textContent = "_ _ _ _ _";
 });
