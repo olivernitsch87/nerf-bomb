@@ -40,11 +40,13 @@ function reset() {
 
 function showArmHideDefuse() {
   armButton.classList.remove("hidden");
+  document.getElementById("armPanel").classList.remove("hidden");
   defuseButton.classList.add("hidden");
 }
 
 function showDefuseHideArm() {
   armButton.classList.add("hidden");
+  document.getElementById("armPanel").classList.add("hidden");
   defuseButton.classList.remove("hidden");
 }
 
