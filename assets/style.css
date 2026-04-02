@@ -150,66 +150,62 @@ button {
   background-color: #2563eb;
 }
 
-#armButton {
-  background-color: #f97316; /* orange */
+.numpad-panel {
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  border: 2px solid #444;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 280px;
 }
 
-  .numpad-panel {
-    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
-    border: 2px solid #444;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
-    width: 100%;
-    max-width: 280px;
-  }
-  
-  .numpad-display {
-    background: #0a0a0a;
-    border: 1px solid #333;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    margin-bottom: 0.75rem;
-    text-align: center;
-    font-family: 'Digital 7', monospace;
-    font-size: 1.8rem;
-    color: #ff2200;
-    text-shadow: 0 0 8px #ff220088;
-    letter-spacing: 0.3em;
-  }
-  
-  .numpad-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.4rem;
-  }
-  
-  .numpad-key {
-  width: auto;
-  max-width: none;
-  font-size: 1.1rem;
-  padding: 0.65rem;
-  border-radius: 8px;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #ccc;
-  cursor: pointer;
+.numpad-display {
+  background: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  font-family: 'Digital 7', monospace;
+  font-size: 1.8rem;
+  color: #ff2200;
+  text-shadow: 0 0 8px #ff220088;
+  letter-spacing: 0.3em;
 }
-  
-  .numpad-key:active {
-    transform: scale(0.95);
-    box-shadow: none;
-  }
-  
-  .numpad-key.dummy {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    cursor: default;
-  }
-  
-  .numpad-grid {
-  cursor: pointer;
+
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.numpad-key {
+width: auto;
+max-width: none;
+font-size: 1.1rem;
+padding: 0.65rem;
+border-radius: 8px;
+background: #2a2a2a;
+border: 1px solid #444;
+color: #ccc;
+cursor: pointer;
+}
+
+.numpad-key:active {
+  transform: scale(0.95);
+  box-shadow: none;
+}
+
+.numpad-key.dummy {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: default;
+}
+
+.numpad-grid {
+cursor: pointer;
 }
 
 .numpad-grid:active .numpad-key {
