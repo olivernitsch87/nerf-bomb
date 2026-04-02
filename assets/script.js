@@ -16,6 +16,7 @@ const fullscreenButton = document.getElementById("fullscreenButton");
 const resetButton = document.getElementById("resetButton");
 
 let holdInterval;
+let animateInterval;
 let countdownTimer;
 let beepTimer;
 let countdown = 0;
@@ -80,18 +81,17 @@ function startCountdown() {
       clearInterval(countdownTimer);
       clearTimeout(beepTimer);
       timerDisplay.textContent = "💥 BOOM!";
-      timerDisplay.classList.add("warning"); // bleibt blinkend
+      timerDisplay.classList.add("warning");
       explosion.currentTime = 0;
       explosion.play();
       setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
       body.classList.add("explosion");
       setTimeout(() => body.classList.remove("explosion"), 600);
       defuseButton.classList.add("hidden");
-      resetButton.classList.remove("hidden"); // Reset-Button einblenden
+      resetButton.classList.remove("hidden");
     }
   }, 1000);
 
-  // planted.mp3 und Countdown-Beep gleichzeitig starten
   planted.currentTime = 0;
   planted.play();
   adaptiveBeep();
@@ -121,7 +121,7 @@ function flashBackground() {
   setTimeout(() => body.classList.remove("flash"), 100);
 }
 
-/* Halte-Logik für Buttons */
+/* Numpad-Animation */
 
 function animateNumpad() {
   const display = document.getElementById("numpadDisplay");
@@ -130,9 +130,9 @@ function animateNumpad() {
   const blanks = ["_", "_", "_", "_", "_"];
   let i = 0;
   display.textContent = "_ _ _ _ _";
-  const interval = setInterval(() => {
+  animateInterval = setInterval(() => {
     if (i >= codes.length) {
-      clearInterval(interval);
+      clearInterval(animateInterval);
       return;
     }
     blanks[i] = codes[i];
@@ -140,6 +140,8 @@ function animateNumpad() {
     i++;
   }, 300);
 }
+
+/* Halte-Logik für Buttons */
 
 function holdButton(btn, callback) {
   const onFirstTouch = () => {
@@ -150,31 +152,33 @@ function holdButton(btn, callback) {
 
   const startHold = () => {
     onFirstTouch();
-    animateNumpad();
+    if (btn === armButton) animateNumpad();
     const duration = parseInt(holdTimeInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
     progress.style.width = "0%";
-  holdInterval = setInterval(() => {
-  if (!bombActive && btn === defuseButton) {
-    clearInterval(holdInterval);
-    progressBar.style.display = "none";
-    progress.style.width = "0%";
-    return;
-  }
-  const held = Date.now() - holdStart;
-  const percent = Math.min(100, (held / duration) * 100);
-  progress.style.width = percent + "%";
-  if (held >= duration) {
-    clearInterval(holdInterval);
-    progressBar.style.display = "none";
-    callback();
-  }
-}, 50);
+    holdInterval = setInterval(() => {
+      if (!bombActive && btn === defuseButton) {
+        clearInterval(holdInterval);
+        progressBar.style.display = "none";
+        progress.style.width = "0%";
+        return;
+      }
+      const held = Date.now() - holdStart;
+      const percent = Math.min(100, (held / duration) * 100);
+      progress.style.width = percent + "%";
+      if (held >= duration) {
+        clearInterval(holdInterval);
+        progressBar.style.display = "none";
+        callback();
+      }
+    }, 50);
   };
 
   const cancelHold = () => {
     clearInterval(holdInterval);
+    clearInterval(animateInterval);
+    document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
     progress.style.width = "0%";
     progressBar.style.display = "none";
   };
@@ -197,7 +201,7 @@ holdButton(armButton, () => {
 });
 
 holdButton(defuseButton, () => {
-  if (!bombActive) return; // Explosion bereits passiert
+  if (!bombActive) return;
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
   timerDisplay.textContent = "✅ Entschärft!";
@@ -228,13 +232,11 @@ countdownInput.addEventListener("input", () => {
 });
 
 /* Einstellungen ein-/ausblenden */
-
 settingsToggle.addEventListener("click", () => {
   settingsPanel.classList.toggle("hidden");
 });
 
 /* Vollbildmodus */
-
 function toggleFullscreen() {
   if (!document.fullscreenElement) {
     if (document.documentElement.requestFullscreen) {
@@ -250,7 +252,6 @@ function toggleFullscreen() {
 fullscreenButton.addEventListener("click", toggleFullscreen);
 
 /* Initialer Zustand beim Laden */
-
 setInitialState();
 
 resetButton.addEventListener("click", () => {
@@ -262,4 +263,3 @@ resetButton.addEventListener("click", () => {
   countdownInput.disabled = false;
   document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
 });
-  
