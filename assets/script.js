@@ -121,6 +121,24 @@ function flashBackground() {
 
 /* Halte-Logik für Buttons */
 
+function animateNumpad() {
+  const display = document.getElementById("numpadDisplay");
+  if (!display) return;
+  const codes = ["4", "2", "7", "1", "9"];
+  const blanks = ["_", "_", "_", "_", "_"];
+  let i = 0;
+  display.textContent = "_ _ _ _ _";
+  const interval = setInterval(() => {
+    if (i >= codes.length) {
+      clearInterval(interval);
+      return;
+    }
+    blanks[i] = codes[i];
+    display.textContent = blanks.join(" ");
+    i++;
+  }, 300);
+}
+
 function holdButton(btn, callback) {
   const onFirstTouch = () => {
     beep.currentTime = 0;
