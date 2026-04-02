@@ -15,18 +15,48 @@ body {
   display: flex;
   flex-direction: column;
   transition: background-color 0.2s, filter 0.2s;
+  position: relative;
+  overflow-x: hidden;
 }
 
-body.flash {
-  background-color: #2a0000;
-  filter: brightness(1.08) saturate(1.05);
+/* Alarm-/Flacker-Overlay statt direkter Body-Einfärbung */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at center, rgba(255, 80, 40, 0.12), rgba(120, 0, 0, 0.22));
+  transition: opacity 0.08s ease;
 }
 
-/* Vollbild-Explosionseffekt */
+body.flash::before {
+  opacity: 0.42;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 70, 20, 0.18), rgba(120, 0, 0, 0.18) 45%, rgba(0, 0, 0, 0.08) 80%);
+}
 
+body.explosion::before {
+  opacity: 0.72;
+  background:
+    radial-gradient(circle at center, rgba(255, 110, 30, 0.28), rgba(180, 0, 0, 0.22) 45%, rgba(0, 0, 0, 0.12) 80%);
+}
+
+body.flash,
 body.explosion {
-  background-color: #6a0000;
-  filter: brightness(1.12) saturate(1.2);
+  filter: brightness(1.04) saturate(1.08);
+}
+
+/* Inhalte über Overlay legen */
+
+.top-bar,
+.settings,
+main {
+  position: relative;
+  z-index: 1;
 }
 
 /* Top-Bar */
@@ -243,7 +273,7 @@ button:active {
   position: relative;
   background:
     linear-gradient(180deg, rgba(255, 220, 140, 0.08), rgba(255, 255, 255, 0.01)),
-    rgba(10, 10, 10, 0.28);
+    rgba(10, 10, 10, 0.38);
   border: 1px solid rgba(255, 190, 70, 0.22);
   border-radius: 14px;
   padding: 1rem;
@@ -256,6 +286,7 @@ button:active {
   width: 100%;
   max-width: 280px;
   overflow: hidden;
+  z-index: 1;
 }
 
 .numpad-panel::before {
