@@ -1,3 +1,4 @@
+document.getElementById("debug").textContent = "Script geladen! defuseButton: " + (document.getElementById("defuseButton") ? "OK" : "NULL");
 const armButton = document.getElementById("armButton");
 const defuseButton = document.getElementById("defuseButton");
 const timerDisplay = document.getElementById("timerDisplay");
