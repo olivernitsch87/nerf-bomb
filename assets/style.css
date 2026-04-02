@@ -154,12 +154,16 @@ button {
   background-color: #2563eb;
 }
 
+/* NUMPAD (angepasst für Transparenz + Realismus) */
+
 .numpad-panel {
-  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
-  border: 2px solid #444;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   width: 100%;
   max-width: 280px;
 }
@@ -182,21 +186,23 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
+  cursor: pointer;
 }
 
 .numpad-key {
-width: auto;
-max-width: none;
-font-size: 1.1rem;
-padding: 0.65rem;
-border-radius: 8px;
-background: #2a2a2a;
-border: 1px solid #444;
-color: #ccc;
-cursor: pointer;
+  width: auto;
+  max-width: none;
+  font-size: 1.1rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ccc;
+  cursor: pointer;
 }
 
 .numpad-key:active {
+  background: rgba(255, 255, 255, 0.1);
   transform: scale(0.95);
   box-shadow: none;
 }
@@ -206,10 +212,6 @@ cursor: pointer;
   border: none;
   box-shadow: none;
   cursor: default;
-}
-
-.numpad-grid {
-cursor: pointer;
 }
 
 .numpad-grid:active .numpad-key {
