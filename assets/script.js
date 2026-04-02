@@ -130,6 +130,7 @@ function holdButton(btn, callback) {
 
   const startHold = () => {
     onFirstTouch();
+    animateNumpad();
     const duration = parseInt(holdTimeInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
