@@ -81,6 +81,7 @@ function startCountdown() {
       timerDisplay.classList.add("warning"); // bleibt blinkend
       explosion.currentTime = 0;
       explosion.play();
+      setTimeout(() => vibrate([300, 100, 300, 100, 300]), 6000);
       body.classList.add("explosion");
       setTimeout(() => body.classList.remove("explosion"), 600);
       defuseButton.classList.add("hidden");
@@ -184,7 +185,8 @@ holdButton(defuseButton, () => {
   defused.currentTime = 0;
   defused.play();
   vibrate([100, 50, 100]);
-  setInitialState();
+  defuseButton.classList.add("hidden");
+  resetButton.classList.remove("hidden");
 });
 
 /* Einstellungen laden */
