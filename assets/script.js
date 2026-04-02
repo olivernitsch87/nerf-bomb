@@ -236,9 +236,5 @@ resetButton.addEventListener("click", () => {
   showArmHideDefuse();
   holdTimeInput.disabled = false;
   countdownInput.disabled = false;
-  });
-  
-document.getElementById("vibrateTest").addEventListener("click", () => {
-  const result = navigator.vibrate(500);
-  alert("vibrate verfügbar: " + !!navigator.vibrate + "\nErgebnis: " + result);
 });
+  
