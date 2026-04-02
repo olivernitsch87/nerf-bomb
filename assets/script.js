@@ -81,7 +81,7 @@ function startCountdown() {
       timerDisplay.classList.add("warning"); // bleibt blinkend
       explosion.currentTime = 0;
       explosion.play();
-      setTimeout(() => vibrate([300, 100, 300, 100, 300]), 6000);
+      setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
       body.classList.add("explosion");
       setTimeout(() => body.classList.remove("explosion"), 600);
       defuseButton.classList.add("hidden");
