@@ -169,8 +169,12 @@ button {
 /* Countdown und Progress */
 
 .countdown {
-  font-size: 4rem;
+  font-size: 6rem;
   margin-top: 2rem;
+  font-family: 'Digital 7', monospace;
+  color: #ff2200;
+  text-shadow: 0 0 10px #ff2200, 0 0 30px #ff220088;
+  letter-spacing: 0.1em;
 }
 
 .progress-bar {
