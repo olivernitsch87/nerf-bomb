@@ -219,10 +219,6 @@ cursor: pointer;
   box-shadow: none;
 }
 
-#defuseButton {
-  background-color: #22c55e; /* grün */
-}
-
 #defuseButton:hover {
   background-color: #16a34a;
 }
