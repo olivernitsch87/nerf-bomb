@@ -208,13 +208,13 @@ button {
     cursor: default;
   }
   
-  .arm-confirm {
-    background: linear-gradient(145deg, #7f1d1d, #991b1b) !important;
-    color: #fff !important;
-    font-weight: bold;
-    border-color: #ef4444 !important;
-    text-shadow: 0 0 8px #ff000088;
-  }
+  .numpad-grid {
+  cursor: pointer;
+}
+
+.numpad-grid:active .numpad-key {
+  border-color: #666;
+}
 
 #armButton:hover {
   background-color: #ea580c;
