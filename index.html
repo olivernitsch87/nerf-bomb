@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Digital+7&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="debug" style="background:red; color:white; padding:0.5rem; font-size:12px;">Lädt...</div>
   <header class="top-bar">
     <h1>Nerf Bomb</h1>
     <div class="top-buttons">
@@ -54,27 +53,27 @@
         </div>
       </div>
 
-      <!-- Team B: Defuse Panel -->
+      <!-- Team B: Defuse Numpad -->
       <div id="defusePanel" class="hidden">
-        <div style="position:relative; width:300px; height:200px; border-radius:12px; overflow:hidden; border:2px solid #333;">
-          <img src="assets/defuseWires.png" style="width:100%; height:100%; object-fit:cover; display:block;"/>
-          <svg id="defuseSvg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" style="position:absolute; top:0; left:0; width:100%; height:100%;">
-            <line id="redLeft" x1="0" y1="106" x2="140" y2="106" stroke="#e53935" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
-            <line id="redRight" x1="140" y1="106" x2="300" y2="106" stroke="#e53935" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
-            <line id="blueLeft" x1="0" y1="104" x2="185" y2="104" stroke="#1e88e5" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
-            <line id="blueRight" x1="185" y1="104" x2="300" y2="104" stroke="#1e88e5" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
-            <g id="pliers" transform="translate(290, 105)">
-              <rect x="-6" y="-18" width="9" height="14" rx="3" fill="#bbb"/>
-              <rect x="-6" y="4" width="9" height="14" rx="3" fill="#bbb"/>
-              <rect x="-18" y="-22" width="14" height="8" rx="3" fill="#999"/>
-              <rect x="-18" y="14" width="14" height="8" rx="3" fill="#999"/>
-              <line x1="-2" y1="-4" x2="-2" y2="4" stroke="#666" stroke-width="2"/>
-            </g>
-            <rect id="cutRedMask" x="133" y="100" width="14" height="12" fill="#000" opacity="0"/>
-            <rect id="cutBlueMask" x="178" y="98" width="14" height="12" fill="#000" opacity="0"/>
-          </svg>
+        <div class="numpad-panel">
+          <div class="numpad-display">
+            <span class="numpad-display-text" id="defuseDisplay">_ _ _ _ _</span>
+          </div>
+          <div class="numpad-grid" id="defuseButton">
+            <div class="numpad-key">1</div>
+            <div class="numpad-key">2</div>
+            <div class="numpad-key">3</div>
+            <div class="numpad-key">4</div>
+            <div class="numpad-key">5</div>
+            <div class="numpad-key">6</div>
+            <div class="numpad-key">7</div>
+            <div class="numpad-key">8</div>
+            <div class="numpad-key">9</div>
+            <div class="numpad-key dummy"></div>
+            <div class="numpad-key">0</div>
+            <div class="numpad-key dummy"></div>
+          </div>
         </div>
-        <button id="defuseButton" style="margin-top:0.75rem; width:300px;">Team B – Gedrückt halten zum Entschärfen</button>
       </div>
 
     </div>
@@ -93,8 +92,5 @@
   <audio id="defused" src="assets/defused.mp3"></audio>
 
   <script src="assets/script.js" defer></script>
-  <script>
-  document.getElementById("debug").textContent = "Inline JS funktioniert!";
-</script>
 </body>
 </html>
