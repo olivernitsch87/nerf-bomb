@@ -124,7 +124,6 @@ function holdButton(btn, callback) {
   const onFirstTouch = () => {
     beep.currentTime = 0;
     beep.play();
-    vibrate(50);
   };
 
   const startHold = () => {
