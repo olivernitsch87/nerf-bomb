@@ -212,8 +212,11 @@ cursor: pointer;
   border-color: #666;
 }
 
-#armButton:hover {
-  background-color: #ea580c;
+#armButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 #defuseButton {
