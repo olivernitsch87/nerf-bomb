@@ -260,5 +260,6 @@ resetButton.addEventListener("click", () => {
   showArmHideDefuse();
   holdTimeInput.disabled = false;
   countdownInput.disabled = false;
+  document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
 });
   
