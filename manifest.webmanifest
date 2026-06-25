@@ -1,0 +1,20 @@
+{
+  "name": "Nerf Bomb",
+  "short_name": "Nerf Bomb",
+  "description": "Bombenentschärfungs-Spiel im CS-Stil für Nerf-Gefechte.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "assets/background.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

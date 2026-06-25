@@ -6,12 +6,15 @@ const explosion = document.getElementById("explosion");
 const planted = document.getElementById("planted");
 const defused = document.getElementById("defused");
 const holdTimeInput = document.getElementById("holdTimeInput");
+const defuseHoldTimeInput = document.getElementById("defuseHoldTimeInput");
 const countdownInput = document.getElementById("countdownInput");
 const progressBar = document.querySelector(".progress-bar");
 const progress = document.getElementById("progress");
 const body = document.body;
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
+const settingsEditToggle = document.getElementById("settingsEditToggle");
+const settingsEditHint = document.getElementById("settingsEditHint");
 const fullscreenButton = document.getElementById("fullscreenButton");
 const resetButton = document.getElementById("resetButton");
 
@@ -21,6 +24,42 @@ let countdownTimer;
 let beepTimer;
 let countdown = 0;
 let bombActive = false;
+
+/* Edit-Mode der Einstellungen.
+   Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
+   PIN ist auch in README.md / CLAUDE.md dokumentiert. */
+const SETTINGS_PIN = "9999";
+let settingsLocked = true;
+
+/* Persistenz des laufenden Countdowns (reload-sicher)
+   Es wird nur der aktive Lauf gespeichert: der absolute Endzeitpunkt.
+   So kann nach einem versehentlichen Reload exakt weitergemacht werden. */
+
+const STORAGE_KEY = "nerfBombState";
+
+function saveBombState(endTime) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTime }));
+  } catch (e) {
+    /* localStorage nicht verfügbar – Spiel läuft trotzdem weiter */
+  }
+}
+
+function loadBombState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearBombState() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    /* ignorieren */
+  }
+}
 
 /* Hilfsfunktionen */
 
@@ -50,23 +89,52 @@ function showDefuseHideArm() {
 }
 
 function setInitialState() {
-  holdTimeInput.disabled = false;
-  countdownInput.disabled = false;
+  refreshInputLocks();
   showArmHideDefuse();
+}
+
+/* Sperrzustand der Eingabefelder aktualisieren.
+   Arm-Haltezeit & Countdown-Länge gelten nur beim Scharfschalten und sind
+   während eines aktiven Laufs ohnehin gesperrt. Bearbeitbar ist generell
+   nur im Edit-Mode (nach PIN). */
+function refreshInputLocks() {
+  const armCountdownLocked = settingsLocked || bombActive;
+  holdTimeInput.disabled = armCountdownLocked;
+  countdownInput.disabled = armCountdownLocked;
+  defuseHoldTimeInput.disabled = settingsLocked;
 }
 
 /* Countdown & Sounds */
 
-function startCountdown() {
-  holdTimeInput.disabled = true;
-  countdownInput.disabled = true;
+function startCountdown(resumeEndTime) {
   bombActive = true;
+  refreshInputLocks();
   reset();
-  countdown = parseInt(countdownInput.value, 10);
+
+  const isResume = typeof resumeEndTime === "number";
+  let endTime;
+  if (isResume) {
+    endTime = resumeEndTime;
+  } else {
+    const length = parseInt(countdownInput.value, 10);
+    endTime = Date.now() + length * 1000;
+    saveBombState(endTime);
+  }
+
+  // Restzeit wird aus dem absoluten Endzeitpunkt berechnet, damit ein Reload
+  // (oder das Drosseln des Tabs im Hintergrund) den Countdown nicht verfälscht.
+  function remainingSeconds() {
+    return Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+  }
+
+  countdown = remainingSeconds();
   timerDisplay.textContent = countdown;
+  if (countdown <= 10) {
+    timerDisplay.classList.add("warning");
+  }
 
   countdownTimer = setInterval(() => {
-    countdown--;
+    countdown = remainingSeconds();
     timerDisplay.textContent = countdown;
     if (countdown <= 10) {
       timerDisplay.classList.add("warning");
@@ -75,24 +143,32 @@ function startCountdown() {
       flashBackground();
     }
     if (countdown <= 0) {
-      bombActive = false;
-      clearInterval(countdownTimer);
-      clearTimeout(beepTimer);
-      timerDisplay.textContent = "💥 BOOM!";
-      timerDisplay.classList.add("warning");
-      explosion.currentTime = 0;
-      explosion.play();
-      setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
-      body.classList.add("explosion");
-      setTimeout(() => body.classList.remove("explosion"), 600);
-      document.getElementById("defusePanel").classList.add("hidden");
-      resetButton.classList.remove("hidden");
+      detonate();
     }
   }, 1000);
 
-  planted.currentTime = 0;
-  planted.play();
+  if (!isResume) {
+    planted.currentTime = 0;
+    planted.play().catch(() => {});
+  }
   adaptiveBeep();
+}
+
+function detonate() {
+  bombActive = false;
+  clearInterval(countdownTimer);
+  clearTimeout(beepTimer);
+  clearBombState();
+  countdown = 0;
+  timerDisplay.textContent = "💥 BOOM!";
+  timerDisplay.classList.add("warning");
+  explosion.currentTime = 0;
+  explosion.play().catch(() => {});
+  setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
+  body.classList.add("explosion");
+  setTimeout(() => body.classList.remove("explosion"), 600);
+  document.getElementById("defusePanel").classList.add("hidden");
+  resetButton.classList.remove("hidden");
 }
 
 function adaptiveBeep() {
@@ -106,7 +182,7 @@ function adaptiveBeep() {
   function beepLoop() {
     if (countdown <= 0) return;
     beep.currentTime = 0;
-    beep.play();
+    beep.play().catch(() => {});
     const delay = getBeepDelay(countdown);
     beepTimer = setTimeout(beepLoop, delay);
   }
@@ -151,7 +227,8 @@ function holdButton(btn, callback) {
     onFirstTouch();
     if (btn === armButton) animateNumpad("numpadDisplay", ["4","2","7","1","9"]);
     if (btn === defuseButton) animateNumpad("defuseDisplay", ["3","8","5","2","1"]);
-    const duration = parseInt(holdTimeInput.value, 10) * 1000;
+    const holdInput = btn === defuseButton ? defuseHoldTimeInput : holdTimeInput;
+    const duration = parseInt(holdInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
     progress.style.width = "0%";
@@ -206,9 +283,10 @@ holdButton(defuseButton, () => {
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
   bombActive = false;
+  clearBombState();
   timerDisplay.textContent = "✅ Entschärft!";
   defused.currentTime = 0;
-  defused.play();
+  defused.play().catch(() => {});
   vibrate([100, 50, 100]);
   document.getElementById("defusePanel").classList.add("hidden");
   resetButton.classList.remove("hidden");
@@ -217,6 +295,9 @@ holdButton(defuseButton, () => {
 /* Einstellungen laden */
 if (localStorage.getItem("holdTime")) {
   holdTimeInput.value = localStorage.getItem("holdTime");
+}
+if (localStorage.getItem("defuseHoldTime")) {
+  defuseHoldTimeInput.value = localStorage.getItem("defuseHoldTime");
 }
 if (localStorage.getItem("countdownTime")) {
   countdownInput.value = localStorage.getItem("countdownTime");
@@ -227,13 +308,41 @@ holdTimeInput.addEventListener("input", () => {
   localStorage.setItem("holdTime", holdTimeInput.value);
 });
 
+defuseHoldTimeInput.addEventListener("input", () => {
+  localStorage.setItem("defuseHoldTime", defuseHoldTimeInput.value);
+});
+
 countdownInput.addEventListener("input", () => {
   localStorage.setItem("countdownTime", countdownInput.value);
 });
 
-/* Einstellungen ein-/ausblenden */
+/* Einstellungen ein-/ausblenden (Anzeigen ist ohne PIN erlaubt) */
 settingsToggle.addEventListener("click", () => {
   settingsPanel.classList.toggle("hidden");
+});
+
+/* Edit-Mode der Einstellungen per PIN freischalten/sperren */
+function setSettingsEditMode(unlocked) {
+  settingsLocked = !unlocked;
+  settingsEditToggle.textContent = unlocked ? "🔓 Sperren" : "🔒 Bearbeiten";
+  settingsEditHint.textContent = unlocked
+    ? "Bearbeiten freigeschaltet."
+    : "Zum Ändern PIN eingeben.";
+  refreshInputLocks();
+}
+
+settingsEditToggle.addEventListener("click", () => {
+  if (settingsLocked) {
+    const pin = prompt("PIN eingeben, um die Einstellungen zu bearbeiten:");
+    if (pin === null) return; // Abgebrochen
+    if (pin === SETTINGS_PIN) {
+      setSettingsEditMode(true);
+    } else {
+      settingsEditHint.textContent = "Falscher PIN.";
+    }
+  } else {
+    setSettingsEditMode(false);
+  }
 });
 
 /* Vollbildmodus */
@@ -251,16 +360,41 @@ function toggleFullscreen() {
 
 fullscreenButton.addEventListener("click", toggleFullscreen);
 
-/* Initialer Zustand beim Laden */
-setInitialState();
-
 resetButton.addEventListener("click", () => {
   reset();
+  clearBombState();
   timerDisplay.classList.remove("warning");
   resetButton.classList.add("hidden");
   showArmHideDefuse();
-  holdTimeInput.disabled = false;
-  countdownInput.disabled = false;
+  refreshInputLocks();
   document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
   document.getElementById("defuseDisplay").textContent = "_ _ _ _ _";
 });
+
+/* Laufenden Countdown nach Reload wiederherstellen */
+function restoreBombState() {
+  const state = loadBombState();
+  if (!state || typeof state.endTime !== "number") return;
+
+  if (state.endTime > Date.now()) {
+    // Bombe läuft noch -> nahtlos weiterführen
+    showDefuseHideArm();
+    startCountdown(state.endTime); // setzt Sperren via refreshInputLocks()
+  } else {
+    // Zeit ist während der Abwesenheit abgelaufen -> Stand verwerfen
+    clearBombState();
+  }
+}
+
+/* Initialer Zustand beim Laden */
+setInitialState();
+restoreBombState();
+
+/* Service Worker für Offline-Betrieb registrieren.
+   Sorgt dafür, dass die App (inkl. aller Sounds) auch ohne Netz
+   und nach einem Reload bei Verbindungsabbruch vollständig läuft. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}

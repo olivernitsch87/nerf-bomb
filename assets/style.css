@@ -181,6 +181,26 @@ input:focus {
     inset 0 1px 4px rgba(0, 0, 0, 0.55);
 }
 
+input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Edit-Mode-Zeile (PIN-Freischaltung) */
+
+.settings-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.settings-edit-hint {
+  font-size: 0.78rem;
+  color: #c9a96a;
+}
+
 /* Hauptbereich */
 
 main {
