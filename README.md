@@ -27,6 +27,8 @@ Vollbild).
   - Haltezeit Scharfschalten (1–30 s, Default 5 s)
   - Haltezeit Entschärfen (separat einstellbar, 1–30 s, Default 5 s)
   - Countdown-Länge (10–300 s, Default 45 s)
+- **PIN-Schutz der Einstellungen:** Anzeigen ist frei, **Ändern** erst nach Eingabe
+  des PIN im Edit-Mode (Button „🔒 Bearbeiten"). **PIN: `9999`** (siehe unten).
 - **Vollbildmodus** und ein-/ausblendbares Einstellungs-Panel.
 - **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in
   `localStorage` gespeichert. Nach einem versehentlichen Neuladen wird der Lauf exakt
@@ -76,6 +78,18 @@ einfachen Webserver verwenden (empfohlen, damit Audio/Fullscreen zuverlässig si
 python3 -m http.server 8000
 # dann http://localhost:8000 öffnen
 ```
+
+## Einstellungen-PIN
+
+Die Einstellungen lassen sich frei **anzeigen**, aber nur im **Edit-Mode**
+**ändern**. Dazu im Einstellungs-Panel auf „🔒 Bearbeiten" tippen und den PIN
+eingeben:
+
+> **PIN: `9999`**
+
+Definiert in `assets/script.js` als Konstante `SETTINGS_PIN`. Zum Ändern des PIN dort
+den Wert anpassen. (Hinweis: Der PIN ist clientseitig im JavaScript hinterlegt und
+schützt nur vor versehentlichem Verstellen, nicht gegen technisch versierte Nutzer.)
 
 ## Hinweise
 

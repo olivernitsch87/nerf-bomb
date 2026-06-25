@@ -13,6 +13,8 @@ const progress = document.getElementById("progress");
 const body = document.body;
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
+const settingsEditToggle = document.getElementById("settingsEditToggle");
+const settingsEditHint = document.getElementById("settingsEditHint");
 const fullscreenButton = document.getElementById("fullscreenButton");
 const resetButton = document.getElementById("resetButton");
 
@@ -22,6 +24,12 @@ let countdownTimer;
 let beepTimer;
 let countdown = 0;
 let bombActive = false;
+
+/* Edit-Mode der Einstellungen.
+   Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
+   PIN ist auch in README.md / CLAUDE.md dokumentiert. */
+const SETTINGS_PIN = "9999";
+let settingsLocked = true;
 
 /* Persistenz des laufenden Countdowns (reload-sicher)
    Es wird nur der aktive Lauf gespeichert: der absolute Endzeitpunkt.
@@ -81,17 +89,26 @@ function showDefuseHideArm() {
 }
 
 function setInitialState() {
-  holdTimeInput.disabled = false;
-  countdownInput.disabled = false;
+  refreshInputLocks();
   showArmHideDefuse();
+}
+
+/* Sperrzustand der Eingabefelder aktualisieren.
+   Arm-Haltezeit & Countdown-Länge gelten nur beim Scharfschalten und sind
+   während eines aktiven Laufs ohnehin gesperrt. Bearbeitbar ist generell
+   nur im Edit-Mode (nach PIN). */
+function refreshInputLocks() {
+  const armCountdownLocked = settingsLocked || bombActive;
+  holdTimeInput.disabled = armCountdownLocked;
+  countdownInput.disabled = armCountdownLocked;
+  defuseHoldTimeInput.disabled = settingsLocked;
 }
 
 /* Countdown & Sounds */
 
 function startCountdown(resumeEndTime) {
-  holdTimeInput.disabled = true;
-  countdownInput.disabled = true;
   bombActive = true;
+  refreshInputLocks();
   reset();
 
   const isResume = typeof resumeEndTime === "number";
@@ -299,9 +316,33 @@ countdownInput.addEventListener("input", () => {
   localStorage.setItem("countdownTime", countdownInput.value);
 });
 
-/* Einstellungen ein-/ausblenden */
+/* Einstellungen ein-/ausblenden (Anzeigen ist ohne PIN erlaubt) */
 settingsToggle.addEventListener("click", () => {
   settingsPanel.classList.toggle("hidden");
+});
+
+/* Edit-Mode der Einstellungen per PIN freischalten/sperren */
+function setSettingsEditMode(unlocked) {
+  settingsLocked = !unlocked;
+  settingsEditToggle.textContent = unlocked ? "🔓 Sperren" : "🔒 Bearbeiten";
+  settingsEditHint.textContent = unlocked
+    ? "Bearbeiten freigeschaltet."
+    : "Zum Ändern PIN eingeben.";
+  refreshInputLocks();
+}
+
+settingsEditToggle.addEventListener("click", () => {
+  if (settingsLocked) {
+    const pin = prompt("PIN eingeben, um die Einstellungen zu bearbeiten:");
+    if (pin === null) return; // Abgebrochen
+    if (pin === SETTINGS_PIN) {
+      setSettingsEditMode(true);
+    } else {
+      settingsEditHint.textContent = "Falscher PIN.";
+    }
+  } else {
+    setSettingsEditMode(false);
+  }
 });
 
 /* Vollbildmodus */
@@ -325,8 +366,7 @@ resetButton.addEventListener("click", () => {
   timerDisplay.classList.remove("warning");
   resetButton.classList.add("hidden");
   showArmHideDefuse();
-  holdTimeInput.disabled = false;
-  countdownInput.disabled = false;
+  refreshInputLocks();
   document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
   document.getElementById("defuseDisplay").textContent = "_ _ _ _ _";
 });
@@ -339,9 +379,7 @@ function restoreBombState() {
   if (state.endTime > Date.now()) {
     // Bombe läuft noch -> nahtlos weiterführen
     showDefuseHideArm();
-    holdTimeInput.disabled = true;
-    countdownInput.disabled = true;
-    startCountdown(state.endTime);
+    startCountdown(state.endTime); // setzt Sperren via refreshInputLocks()
   } else {
     // Zeit ist während der Abwesenheit abgelaufen -> Stand verwerfen
     clearBombState();

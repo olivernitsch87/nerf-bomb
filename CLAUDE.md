@@ -47,7 +47,19 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   (`defuseHoldTimeInput`). In `holdButton` wird je nach Button die passende
   Haltezeit gewählt.
 - Während aktiver Bombe sind `holdTimeInput` und `countdownInput` disabled
-  (gelten nur beim Arm-Zeitpunkt); `defuseHoldTimeInput` bleibt editierbar.
+  (gelten nur beim Arm-Zeitpunkt).
+
+### Einstellungen-PIN / Edit-Mode
+- **PIN: `9999`** – Konstante `SETTINGS_PIN` in `assets/script.js`.
+- Anzeigen des Panels ist immer erlaubt (`settingsToggle`). **Ändern** erst nach
+  PIN-Eingabe über „🔒 Bearbeiten" (`settingsEditToggle` → `prompt`).
+- `settingsLocked` (Default `true`) steuert die Editierbarkeit. `refreshInputLocks()`
+  ist die einzige Stelle, die `disabled` der Felder setzt: gesperrt, wenn
+  `settingsLocked` (alle Felder) bzw. zusätzlich `bombActive` (Arm-Haltezeit +
+  Countdown). Wird von `setInitialState`, `startCountdown`, Reset und dem
+  Edit-Toggle aufgerufen.
+- Der PIN ist rein clientseitig (kein echter Schutz); schützt nur vor
+  versehentlichem Verstellen.
 
 ### Reload-sicherer Countdown
 - Der Countdown ist **endzeitbasiert**: beim Scharfschalten wird `endTime`
