@@ -27,6 +27,12 @@ Vollbild).
   - Haltezeit zum Scharfschalten/Entschärfen (1–30 s, Default 5 s)
   - Countdown-Länge (10–300 s, Default 45 s)
 - **Vollbildmodus** und ein-/ausblendbares Einstellungs-Panel.
+- **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in
+  `localStorage` gespeichert. Nach einem versehentlichen Neuladen wird der Lauf exakt
+  dort fortgesetzt (Defuse-Panel + Beep wieder aktiv). Abgelaufene Stände werden verworfen.
+- **Offline-fähig (PWA):** Ein Service Worker (`sw.js`) cached alle lokalen Assets
+  inkl. **aller Sounds**. Nach dem ersten Laden funktioniert die App komplett ohne
+  Netz – auch bei Verbindungsabbruch und bei einem Reload ohne Verbindung.
 
 ## Bedienung
 
@@ -45,6 +51,8 @@ Vollbild).
 ```
 nerf-bomb/
 ├── index.html            # Seitenstruktur, Audio-Elemente, Panels
+├── sw.js                 # Service Worker (Offline-Cache aller Assets)
+├── manifest.webmanifest  # PWA-Manifest
 ├── README.md             # Diese Datei
 ├── CLAUDE.md             # Technische Arbeitsnotizen
 └── assets/
@@ -75,4 +83,10 @@ python3 -m http.server 8000
   aktiviert ist und der Browser die `navigator.vibrate`-API unterstützt
   (v. a. Android/Chrome; iOS Safari unterstützt sie nicht).
 - Audio-Wiedergabe erfordert auf Mobilgeräten i. d. R. eine vorherige
-  Nutzer-Interaktion (durch das Halten der Buttons gegeben).
+  Nutzer-Interaktion (durch das Halten der Buttons gegeben). Wird der Countdown nach
+  einem Reload automatisch fortgesetzt, kann der Beep durch die Autoplay-Sperre des
+  Browsers bis zur ersten Berührung stummgeschaltet bleiben – der Timer läuft optisch
+  trotzdem korrekt weiter.
+- **Der Service Worker (Offline-Modus) funktioniert nur, wenn die App über einen
+  Webserver (`http://`/`https://`) geöffnet wird – nicht per `file://`.** Auf
+  GitHub Pages o. ä. funktioniert es automatisch; lokal via `python3 -m http.server`.

@@ -7,9 +7,11 @@ Kontext für die Arbeit an diesem Repository.
 Statische Web-App („Nerf Bomb") – Bombenentschärfungs-Spiel im CS-Stil. Kein
 Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla-JS.
 
-- `index.html` – Markup, Panels, Audio-Tags.
-- `assets/script.js` – komplette Logik (~270 Zeilen).
+- `index.html` – Markup, Panels, Audio-Tags, Manifest-/Theme-Color-Links.
+- `assets/script.js` – komplette Logik.
 - `assets/style.css` – Styling (~540 Zeilen), responsiv ab `max-width: 600px`.
+- `sw.js` – Service Worker (Offline-Cache, Cache-first für Same-Origin-Assets).
+- `manifest.webmanifest` – PWA-Manifest.
 
 ## Zentrale Logik (`assets/script.js`)
 
@@ -41,6 +43,32 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   „BOOM!" (potenzielle Inkonsistenz, falls vorher „Neues Spiel" gedrückt wird).
 - Einstellungen werden in `localStorage` unter `holdTime` / `countdownTime` persistiert.
 - Während aktiver Bombe sind die Settings-Inputs disabled.
+
+### Reload-sicherer Countdown
+- Der Countdown ist **endzeitbasiert**: beim Scharfschalten wird `endTime`
+  (`Date.now() + length*1000`) berechnet und unter `localStorage["nerfBombState"]`
+  als `{ endTime }` gespeichert. Die Restzeit wird je Tick aus `endTime` neu
+  berechnet (`remainingSeconds()`), nicht heruntergezählt → robust gegen Reload und
+  Hintergrund-Throttling.
+- `startCountdown(resumeEndTime?)`: ohne Argument frischer Start (speichert State,
+  spielt `planted`); mit Argument Wiederaufnahme (kein erneutes `planted`).
+- `restoreBombState()` läuft beim Laden nach `setInitialState()`: ist `endTime` noch
+  in der Zukunft → Defuse-Panel zeigen und `startCountdown(endTime)`; sonst State
+  verwerfen.
+- State wird gelöscht (`clearBombState()`) bei Detonation, Entschärfung und „Neues Spiel".
+- Es wird bewusst **nur der aktive Lauf** persistiert (keine BOOM/Defused-Endzustände),
+  damit ein späterer App-Start nicht mit einem veralteten Endbildschirm öffnet.
+- `detonate()` kapselt die Explosion (vorher inline im Tick).
+
+### Offline-Betrieb (Service Worker)
+- `sw.js` precached alle lokalen Assets (HTML, CSS, JS, Bilder, **alle Sounds**),
+  Strategie **cache-first** für Same-Origin-Requests; Cross-Origin (Google Fonts)
+  wird durchgereicht (Fallback-Font greift offline).
+- Registrierung am Ende von `script.js` (`navigator.serviceWorker.register("sw.js")`).
+- Cache-Version über `CACHE = "nerf-bomb-v1"` → bei Asset-Änderungen **Version
+  hochzählen**, sonst werden alte Dateien aus dem Cache ausgeliefert.
+- **Wichtig:** SW läuft nur über `http(s)://`, nicht `file://`. Audio-Plays sind mit
+  `.catch(() => {})` abgesichert (Autoplay-Policy nach Reload).
 
 ## CSS (`assets/style.css`)
 - Dunkle Glas-/Neon-Optik mit `backdrop-filter`, Verläufen und Glow-Schatten.

@@ -22,6 +22,36 @@ let beepTimer;
 let countdown = 0;
 let bombActive = false;
 
+/* Persistenz des laufenden Countdowns (reload-sicher)
+   Es wird nur der aktive Lauf gespeichert: der absolute Endzeitpunkt.
+   So kann nach einem versehentlichen Reload exakt weitergemacht werden. */
+
+const STORAGE_KEY = "nerfBombState";
+
+function saveBombState(endTime) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTime }));
+  } catch (e) {
+    /* localStorage nicht verfügbar – Spiel läuft trotzdem weiter */
+  }
+}
+
+function loadBombState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearBombState() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    /* ignorieren */
+  }
+}
+
 /* Hilfsfunktionen */
 
 function vibrate(pattern) {
@@ -57,16 +87,36 @@ function setInitialState() {
 
 /* Countdown & Sounds */
 
-function startCountdown() {
+function startCountdown(resumeEndTime) {
   holdTimeInput.disabled = true;
   countdownInput.disabled = true;
   bombActive = true;
   reset();
-  countdown = parseInt(countdownInput.value, 10);
+
+  const isResume = typeof resumeEndTime === "number";
+  let endTime;
+  if (isResume) {
+    endTime = resumeEndTime;
+  } else {
+    const length = parseInt(countdownInput.value, 10);
+    endTime = Date.now() + length * 1000;
+    saveBombState(endTime);
+  }
+
+  // Restzeit wird aus dem absoluten Endzeitpunkt berechnet, damit ein Reload
+  // (oder das Drosseln des Tabs im Hintergrund) den Countdown nicht verfälscht.
+  function remainingSeconds() {
+    return Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+  }
+
+  countdown = remainingSeconds();
   timerDisplay.textContent = countdown;
+  if (countdown <= 10) {
+    timerDisplay.classList.add("warning");
+  }
 
   countdownTimer = setInterval(() => {
-    countdown--;
+    countdown = remainingSeconds();
     timerDisplay.textContent = countdown;
     if (countdown <= 10) {
       timerDisplay.classList.add("warning");
@@ -75,24 +125,32 @@ function startCountdown() {
       flashBackground();
     }
     if (countdown <= 0) {
-      bombActive = false;
-      clearInterval(countdownTimer);
-      clearTimeout(beepTimer);
-      timerDisplay.textContent = "💥 BOOM!";
-      timerDisplay.classList.add("warning");
-      explosion.currentTime = 0;
-      explosion.play();
-      setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
-      body.classList.add("explosion");
-      setTimeout(() => body.classList.remove("explosion"), 600);
-      document.getElementById("defusePanel").classList.add("hidden");
-      resetButton.classList.remove("hidden");
+      detonate();
     }
   }, 1000);
 
-  planted.currentTime = 0;
-  planted.play();
+  if (!isResume) {
+    planted.currentTime = 0;
+    planted.play().catch(() => {});
+  }
   adaptiveBeep();
+}
+
+function detonate() {
+  bombActive = false;
+  clearInterval(countdownTimer);
+  clearTimeout(beepTimer);
+  clearBombState();
+  countdown = 0;
+  timerDisplay.textContent = "💥 BOOM!";
+  timerDisplay.classList.add("warning");
+  explosion.currentTime = 0;
+  explosion.play().catch(() => {});
+  setTimeout(() => vibrate([300, 100, 300, 100, 300]), 5000);
+  body.classList.add("explosion");
+  setTimeout(() => body.classList.remove("explosion"), 600);
+  document.getElementById("defusePanel").classList.add("hidden");
+  resetButton.classList.remove("hidden");
 }
 
 function adaptiveBeep() {
@@ -106,7 +164,7 @@ function adaptiveBeep() {
   function beepLoop() {
     if (countdown <= 0) return;
     beep.currentTime = 0;
-    beep.play();
+    beep.play().catch(() => {});
     const delay = getBeepDelay(countdown);
     beepTimer = setTimeout(beepLoop, delay);
   }
@@ -206,9 +264,10 @@ holdButton(defuseButton, () => {
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
   bombActive = false;
+  clearBombState();
   timerDisplay.textContent = "✅ Entschärft!";
   defused.currentTime = 0;
-  defused.play();
+  defused.play().catch(() => {});
   vibrate([100, 50, 100]);
   document.getElementById("defusePanel").classList.add("hidden");
   resetButton.classList.remove("hidden");
@@ -251,11 +310,9 @@ function toggleFullscreen() {
 
 fullscreenButton.addEventListener("click", toggleFullscreen);
 
-/* Initialer Zustand beim Laden */
-setInitialState();
-
 resetButton.addEventListener("click", () => {
   reset();
+  clearBombState();
   timerDisplay.classList.remove("warning");
   resetButton.classList.add("hidden");
   showArmHideDefuse();
@@ -264,3 +321,33 @@ resetButton.addEventListener("click", () => {
   document.getElementById("numpadDisplay").textContent = "_ _ _ _ _";
   document.getElementById("defuseDisplay").textContent = "_ _ _ _ _";
 });
+
+/* Laufenden Countdown nach Reload wiederherstellen */
+function restoreBombState() {
+  const state = loadBombState();
+  if (!state || typeof state.endTime !== "number") return;
+
+  if (state.endTime > Date.now()) {
+    // Bombe läuft noch -> nahtlos weiterführen
+    showDefuseHideArm();
+    holdTimeInput.disabled = true;
+    countdownInput.disabled = true;
+    startCountdown(state.endTime);
+  } else {
+    // Zeit ist während der Abwesenheit abgelaufen -> Stand verwerfen
+    clearBombState();
+  }
+}
+
+/* Initialer Zustand beim Laden */
+setInitialState();
+restoreBombState();
+
+/* Service Worker für Offline-Betrieb registrieren.
+   Sorgt dafür, dass die App (inkl. aller Sounds) auch ohne Netz
+   und nach einem Reload bei Verbindungsabbruch vollständig läuft. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
