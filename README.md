@@ -24,7 +24,8 @@ Vollbild).
 - **Haptik:** Vibration bei Tastendruck, Plant, Defuse und Explosion
   (sofern vom Gerät/System unterstützt).
 - **Einstellungen (persistiert in `localStorage`):**
-  - Haltezeit zum Scharfschalten/Entschärfen (1–30 s, Default 5 s)
+  - Haltezeit Scharfschalten (1–30 s, Default 5 s)
+  - Haltezeit Entschärfen (separat einstellbar, 1–30 s, Default 5 s)
   - Countdown-Länge (10–300 s, Default 45 s)
 - **Vollbildmodus** und ein-/ausblendbares Einstellungs-Panel.
 - **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in

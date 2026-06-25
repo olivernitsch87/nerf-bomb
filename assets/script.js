@@ -6,6 +6,7 @@ const explosion = document.getElementById("explosion");
 const planted = document.getElementById("planted");
 const defused = document.getElementById("defused");
 const holdTimeInput = document.getElementById("holdTimeInput");
+const defuseHoldTimeInput = document.getElementById("defuseHoldTimeInput");
 const countdownInput = document.getElementById("countdownInput");
 const progressBar = document.querySelector(".progress-bar");
 const progress = document.getElementById("progress");
@@ -209,7 +210,8 @@ function holdButton(btn, callback) {
     onFirstTouch();
     if (btn === armButton) animateNumpad("numpadDisplay", ["4","2","7","1","9"]);
     if (btn === defuseButton) animateNumpad("defuseDisplay", ["3","8","5","2","1"]);
-    const duration = parseInt(holdTimeInput.value, 10) * 1000;
+    const holdInput = btn === defuseButton ? defuseHoldTimeInput : holdTimeInput;
+    const duration = parseInt(holdInput.value, 10) * 1000;
     let holdStart = Date.now();
     progressBar.style.display = "block";
     progress.style.width = "0%";
@@ -277,6 +279,9 @@ holdButton(defuseButton, () => {
 if (localStorage.getItem("holdTime")) {
   holdTimeInput.value = localStorage.getItem("holdTime");
 }
+if (localStorage.getItem("defuseHoldTime")) {
+  defuseHoldTimeInput.value = localStorage.getItem("defuseHoldTime");
+}
 if (localStorage.getItem("countdownTime")) {
   countdownInput.value = localStorage.getItem("countdownTime");
 }
@@ -284,6 +289,10 @@ if (localStorage.getItem("countdownTime")) {
 /* Einstellungen speichern bei Änderung */
 holdTimeInput.addEventListener("input", () => {
   localStorage.setItem("holdTime", holdTimeInput.value);
+});
+
+defuseHoldTimeInput.addEventListener("input", () => {
+  localStorage.setItem("defuseHoldTime", defuseHoldTimeInput.value);
 });
 
 countdownInput.addEventListener("input", () => {

@@ -41,8 +41,13 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
 - **`vibrate()`** kapselt `navigator.vibrate` (No-op, wenn nicht unterstützt – z. B. iOS).
 - Explosions-Vibration ist via `setTimeout(..., 5000)` verzögert – wirkt erst 5 s nach
   „BOOM!" (potenzielle Inkonsistenz, falls vorher „Neues Spiel" gedrückt wird).
-- Einstellungen werden in `localStorage` unter `holdTime` / `countdownTime` persistiert.
-- Während aktiver Bombe sind die Settings-Inputs disabled.
+- Einstellungen werden in `localStorage` unter `holdTime` / `defuseHoldTime` /
+  `countdownTime` persistiert.
+- Haltezeit ist **getrennt** für Scharfschalten (`holdTimeInput`) und Entschärfen
+  (`defuseHoldTimeInput`). In `holdButton` wird je nach Button die passende
+  Haltezeit gewählt.
+- Während aktiver Bombe sind `holdTimeInput` und `countdownInput` disabled
+  (gelten nur beim Arm-Zeitpunkt); `defuseHoldTimeInput` bleibt editierbar.
 
 ### Reload-sicherer Countdown
 - Der Countdown ist **endzeitbasiert**: beim Scharfschalten wird `endTime`
