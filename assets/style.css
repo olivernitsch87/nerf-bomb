@@ -382,6 +382,11 @@ button:active {
   max-width: 280px;
   overflow: hidden;
   z-index: 1;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 .numpad-panel::before {
@@ -445,6 +450,11 @@ button:active {
   font-weight: bold;
   padding: 0.72rem;
   border-radius: 8px;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
   background:
     linear-gradient(180deg, rgba(255, 220, 140, 0.08), rgba(255, 255, 255, 0.01)),
     rgba(0, 0, 0, 0.24);

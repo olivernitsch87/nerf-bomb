@@ -38,6 +38,11 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
 ### Wichtige Details / Stolpersteine
 - Die Numpad-Codes (`4 2 7 1 9` / `3 8 5 2 1`) sind **nur Animation**, keine echte
   Code-Prüfung. Auslöser ist ausschließlich die Haltedauer.
+- `.numpad-panel` (und zusätzlich explizit `.numpad-key`, da `touch-action`
+  nicht vererbt wird) haben `user-select: none` / `touch-action: manipulation` /
+  `-webkit-touch-callout: none`. Ohne das löst ein längeres Halten auf den
+  Zahlen-`<div>`s die native Text-Auswahl des Browsers aus, was den
+  `touchstart`/`mousedown`-Hold via `touchcancel` abbricht (Bugfix).
 - **`vibrate()`** kapselt `navigator.vibrate` (No-op, wenn nicht unterstützt – z. B. iOS).
 - Explosions-Vibration ist via `setTimeout(..., 5000)` verzögert – das ist
   **beabsichtigt**, da der eigentliche Knall in `explosion.mp3` erst gegen Ende
