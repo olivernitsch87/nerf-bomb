@@ -144,6 +144,23 @@ main {
   color: #d9c18a;
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.panel-header h2 {
+  margin-bottom: 0;
+}
+
+.panel-close {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  white-space: nowrap;
+}
+
 label {
   display: block;
   margin-top: 0.55rem;

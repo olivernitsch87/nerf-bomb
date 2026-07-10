@@ -158,6 +158,13 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   sowie `scoreResetButton` (mit `confirm()`-Bestätigung). Bewusst **keine
   PIN-Sperre** auf Score-Änderungen – anders als Einstellungen werden Punkte
   während des laufenden Spiels häufig geändert.
+- `settingsPanel` und `scorePanel` haben je einen eigenen „✕ Schließen"-Button
+  (`.panel-close`, `data-panel="…"`, ein delegierter Listener setzt
+  `classList.add("hidden")` auf das referenzierte Panel). Ohne diesen Button
+  wäre ein Panel nur über einen erneuten Klick auf denselben Menüeintrag im
+  Burger-Menü schließbar – das war nicht auffindbar (Bugfix). Zusätzlich
+  schließt das Öffnen von Settings/Score automatisch das jeweils andere
+  Panel, damit nie beide gleichzeitig offen sind.
 - **Teams-Tipp:** Hinweistext in `settingsPanel` (gleicher Stil wie der
   Haptik-Hinweis) empfiehlt, sich bei größeren Spielfeldern zusätzlich per
   Microsoft-Teams-Sitzung zu verbinden (Freisprechen an, Kamera/Mikro aus)

@@ -455,9 +455,20 @@ countdownInput.addEventListener("input", () => {
   localStorage.setItem("countdownTime", countdownInput.value);
 });
 
-/* Einstellungen ein-/ausblenden (Anzeigen ist ohne PIN erlaubt) */
+/* Einstellungen ein-/ausblenden (Anzeigen ist ohne PIN erlaubt).
+   Score-Panel wird dabei geschlossen, damit nie beide gleichzeitig offen sind. */
 settingsToggle.addEventListener("click", () => {
+  scorePanel.classList.add("hidden");
   settingsPanel.classList.toggle("hidden");
+});
+
+/* Direkter Schließen-Button je Panel (Settings/Score), da die Panels sonst
+   nur über einen erneuten Klick auf den jeweiligen Menüeintrag zu
+   schließen wären. */
+document.querySelectorAll(".panel-close").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.getElementById(btn.dataset.panel).classList.add("hidden");
+  });
 });
 
 /* Burger-Menü ein-/ausblenden. Ein Klick auf einen Menüeintrag schließt
@@ -498,6 +509,7 @@ document.querySelectorAll(".score-btn").forEach((btn) => {
 });
 
 scoreToggle.addEventListener("click", () => {
+  settingsPanel.classList.add("hidden");
   scorePanel.classList.toggle("hidden");
 });
 
