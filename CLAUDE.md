@@ -204,6 +204,18 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
 - Numpad-„Display" nutzt die Webfont **Digital 7** (geladen in `index.html` via
   Google Fonts) mit Monospace-Fallback.
 - `.hidden { display: none !important; }` steuert die Sichtbarkeit der Panels.
+- **Mobile-Polish (UX/UI-Audit):** `-webkit-tap-highlight-color: transparent`
+  auf `html` (kein grauer Tap-Flash), `.icon-button` hat `min-height: 2.75rem`
+  (~44px Tap-Target). `viewport-fit=cover` in `index.html` +
+  `env(safe-area-inset-top/bottom)` auf `.top-bar`/`main` für Notch/
+  Gesten-Leiste (App läuft als installierte PWA im `fullscreen`-Modus).
+  `.numpad-display` und `.score-row` bekommen im `@media (max-width: 600px)`
+  reduzierte Schriftgröße/Abstände, damit Code-Anzeige und Punktestand auf
+  sehr schmalen Geräten nicht umbrechen.
+- **App-Icon:** `assets/icon.svg` (selbst erstelltes SVG, Theme-Farben +
+  💣-Emoji) ersetzt das vorherige `background.png` als Manifest-Icon
+  (`any` + `maskable`) – das Fotohintergrundbild wäre als Homescreen-Icon
+  hässlich zugeschnitten worden.
 
 ## Konventionen
 - Oberfläche und Code-Kommentare sind **auf Deutsch**.

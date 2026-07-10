@@ -11,10 +11,16 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "assets/background.png",
+      "src": "assets/icon.svg",
       "sizes": "any",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

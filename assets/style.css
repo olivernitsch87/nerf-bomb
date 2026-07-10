@@ -1,5 +1,9 @@
 /* Grundlayout */
 
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #050505;
@@ -68,6 +72,7 @@ main {
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem;
+  padding-top: calc(0.85rem + env(safe-area-inset-top));
   background:
     linear-gradient(180deg, rgba(70, 70, 70, 0.18), rgba(10, 10, 10, 0.72)),
     rgba(8, 8, 8, 0.72);
@@ -96,6 +101,10 @@ main {
   -ms-user-select: none;
   user-select: none;
   touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
   font-size: 0.88rem;
   padding: 0.45rem 0.8rem;
   border: 1px solid rgba(255, 190, 70, 0.2);
@@ -285,6 +294,7 @@ main {
   align-items: center;
   text-align: center;
   padding: 1.25rem 1rem 2rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
 }
 
 /* Buttons für Team A/B */
@@ -640,5 +650,19 @@ button:active {
 
   .numpad-panel {
     max-width: 300px;
+  }
+
+  .numpad-display {
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+  }
+
+  .score-row {
+    gap: 0.5rem;
+  }
+
+  .score-team-label {
+    min-width: 3.5rem;
+    font-size: 0.85rem;
   }
 }
