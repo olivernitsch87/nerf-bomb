@@ -47,7 +47,7 @@ let settingsLocked = true;
 /* Restzeit-Schwellen (Sekunden), bei denen zusätzlich zum Beep eine
    gesprochene Ansage erfolgt – hörbar, ohne dass jemand aufs Display
    schauen muss (z. B. während die Bombe im Rucksack getragen wird). */
-const SPEECH_THRESHOLDS = [60, 30, 10, 5];
+const SPEECH_THRESHOLDS = [60, 30, 10];
 
 /* Persistenz des laufenden Countdowns (reload-sicher)
    Es wird nur der aktive Lauf gespeichert: der absolute Endzeitpunkt.
@@ -92,14 +92,21 @@ function vibrate(pattern) {
    auch eine netzwerkbasierte Stimme (Google-Cloud-TTS) für Deutsch an – ohne
    explizite Auswahl kann Chrome eine Netzwerk-Stimme wählen, die bei
    Verbindungsabbruch stumm bleibt. Stimmenliste lädt asynchron nach, daher
-   zusätzlich auf "voiceschanged" reagieren. */
+   zusätzlich auf "voiceschanged" reagieren.
+   Die Web Speech API liefert kein Geschlecht-Attribut für Stimmen – eine
+   männliche Stimme wird daher nur heuristisch über den Stimmennamen
+   bevorzugt (z. B. "German (Male)"). Ist auf dem Gerät nur eine einzige
+   deutsche Stimme installiert, gibt es keine Auswahlmöglichkeit. */
 let speechVoice = null;
 
 function pickGermanVoice() {
   if (!("speechSynthesis" in window)) return null;
   const germanVoices = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith("de"));
   if (!germanVoices.length) return null;
-  return germanVoices.find((v) => v.localService) || germanVoices[0];
+  const local = germanVoices.filter((v) => v.localService);
+  const candidates = local.length ? local : germanVoices;
+  const male = candidates.find((v) => /male/i.test(v.name) && !/female/i.test(v.name));
+  return male || candidates[0];
 }
 
 if ("speechSynthesis" in window) {

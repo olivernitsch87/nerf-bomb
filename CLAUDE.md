@@ -51,7 +51,8 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   (gelten nur beim Arm-Zeitpunkt).
 
 ### Gesprochene Countdown-Ansage
-- `SPEECH_THRESHOLDS = [60, 30, 10, 5]` (Sekunden Restzeit) – bei jeder
+- `SPEECH_THRESHOLDS = [60, 30, 10]` (Sekunden Restzeit; 10 s ist bewusst
+  die letzte Ansage, keine 5-Sekunden-Schwelle) – bei jeder
   Schwelle sagt `speak()` per **Web Speech API**
   (`SpeechSynthesisUtterance`, `lang = "de-DE"`) „Noch N Sekunden" an,
   zusätzlich zum Beep. Zweck: Restzeit ist hörbar, ohne dass jemand aufs
@@ -80,6 +81,13 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   muss die deutsche Stimme als Sprachpaket heruntergeladen sein – ist gar
   keine deutsche Stimme installiert, bleibt die Ansage stumm, unabhängig
   vom Code (kein rein clientseitig lösbares Problem).
+- **Männliche Stimme (Best-Effort):** Unter den gefundenen deutschen
+  Stimmen wird eine bevorzugt, deren Name auf „male" passt (Regex
+  `/male/i`, ohne „female"). Die Web Speech API liefert kein
+  Geschlecht-Attribut – das ist reine Namensheuristik. Ist auf dem Gerät
+  nur eine einzige deutsche Stimme installiert, gibt es keine
+  Auswahlmöglichkeit (kein Code-Fix möglich, hängt vom installierten
+  Sprachpaket/TTS-Engine des Geräts ab).
 
 ### Einstellungen-PIN / Edit-Mode
 - **PIN: `9999`** – Konstante `SETTINGS_PIN` in `assets/script.js`.
