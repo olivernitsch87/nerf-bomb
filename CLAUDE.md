@@ -211,11 +211,22 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Gesten-Leiste (App läuft als installierte PWA im `fullscreen`-Modus).
   `.numpad-display` und `.score-row` bekommen im `@media (max-width: 600px)`
   reduzierte Schriftgröße/Abstände, damit Code-Anzeige und Punktestand auf
-  sehr schmalen Geräten nicht umbrechen.
-- **App-Icon:** `assets/icon.svg` (selbst erstelltes SVG, Theme-Farben +
-  💣-Emoji) ersetzt das vorherige `background.png` als Manifest-Icon
-  (`any` + `maskable`) – das Fotohintergrundbild wäre als Homescreen-Icon
-  hässlich zugeschnitten worden.
+  sehr schmalen Geräten nicht umbrechen. Die mobile Regel für volle
+  Button-Breite ist gezielt `button:not(.icon-button)` – sie darf `.icon-button`
+  (☰, ✕, `+1`/`-1` usw.) **nicht** treffen, sonst werden diese auf Mobile
+  fälschlich auf 100% Breite gestreckt (führte zu genau diesem Bug).
+- **`.panel-close`** ("✕"-Schließen-Button in `settingsPanel`/`scorePanel`)
+  ist bewusst ein rundes Icon-Button (kein Text-Label), optisch von den
+  goldenen Haupt-Buttons abgesetzt (rötlicher Hover), damit er klar als
+  eigenständige Schließen-Aktion erkennbar ist.
+- **App-Icon:** `assets/icon.svg` existiert als selbst erstelltes,
+  themenpassendes SVG (💣-Emoji), wird aber **nicht** im Manifest verwendet –
+  Android generiert für installierte Fullscreen-PWAs den Splash-Screen aus
+  dem Manifest-Icon, und SVG wird dabei nicht zuverlässig unterstützt
+  (führte zu einem App-Start-Hänger am Splash-Screen). Das Manifest nutzt
+  daher weiterhin `assets/background.png` als Icon (bekannter
+  Foto-Zuschnitt-Kompromiss). Ein Ersatz durch ein echtes PNG (z. B. Export
+  von `icon.svg` außerhalb dieser Umgebung) ist ein möglicher Folge-Schritt.
 
 ## Konventionen
 - Oberfläche und Code-Kommentare sind **auf Deutsch**.

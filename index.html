@@ -27,10 +27,10 @@
   <section id="settingsPanel" class="settings hidden">
     <div class="panel-header">
       <h2>Einstellungen</h2>
-      <button class="icon-button panel-close" data-panel="settingsPanel">✕ Schließen</button>
+      <button class="icon-button panel-close" data-panel="settingsPanel" aria-label="Schließen">✕</button>
     </div>
-    <p style="font-size: 0.8rem; color: #aaa; margin: 0 0 0.5rem;">Hinweis: Das haptische Feedback muss in den Systemeinstellungen aktiviert sein, damit die Vibrations-Effekte funktionieren.</p>
-    <p style="font-size: 0.8rem; color: #aaa; margin: 0 0 0.5rem;">Tipp: Bei größeren Spielfeldern zusätzlich per Microsoft Teams verbinden (Freisprechen an, Kamera/Mikro aus) und auf dem Bomben-Handy Bildschirm + Systemaudio teilen – so hören alle Beep, Ansagen und Explosion auch über Distanz, wie Comms bei Taktik-Shootern.</p>
+    <p class="settings-hint">Hinweis: Das haptische Feedback muss in den Systemeinstellungen aktiviert sein, damit die Vibrations-Effekte funktionieren.</p>
+    <p class="settings-hint">Tipp: Bei größeren Spielfeldern zusätzlich per Microsoft Teams verbinden (Freisprechen an, Kamera/Mikro aus) und auf dem Bomben-Handy Bildschirm + Systemaudio teilen – so hören alle Beep, Ansagen und Explosion auch über Distanz, wie Comms bei Taktik-Shootern.</p>
     <div class="settings-edit-row">
       <button id="settingsEditToggle" class="icon-button" type="button">🔒 Bearbeiten</button>
       <span id="settingsEditHint" class="settings-edit-hint">Zum Ändern PIN eingeben.</span>
@@ -52,7 +52,7 @@
   <section id="scorePanel" class="settings hidden">
     <div class="panel-header">
       <h2>Punktestand</h2>
-      <button class="icon-button panel-close" data-panel="scorePanel">✕ Schließen</button>
+      <button class="icon-button panel-close" data-panel="scorePanel" aria-label="Schließen">✕</button>
     </div>
     <div class="score-row">
       <span class="score-team-label">Team A</span>

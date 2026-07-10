@@ -134,7 +134,7 @@ main {
 /* Einstellungen */
 
 .settings {
-  padding: 0.85rem 1rem 0.65rem;
+  padding: 1.1rem 1.25rem 1rem;
   background:
     linear-gradient(180deg, rgba(40, 30, 10, 0.15), rgba(8, 8, 8, 0.6)),
     rgba(10, 10, 10, 0.55);
@@ -158,6 +158,7 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
+  margin-bottom: 0.5rem;
 }
 
 .panel-header h2 {
@@ -165,14 +166,27 @@ main {
 }
 
 .panel-close {
-  font-size: 0.8rem;
-  padding: 0.35rem 0.65rem;
-  white-space: nowrap;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ddd3bf;
+}
+
+.panel-close:hover {
+  border-color: rgba(255, 100, 70, 0.5);
+  color: #ff6b4a;
+  background: rgba(255, 60, 30, 0.12);
 }
 
 label {
   display: block;
-  margin-top: 0.55rem;
+  margin-top: 0.9rem;
   font-size: 0.95rem;
   color: #ddd3bf;
 }
@@ -209,6 +223,13 @@ input:disabled {
   cursor: not-allowed;
 }
 
+.settings-hint {
+  font-size: 0.8rem;
+  color: #aaa;
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
 /* Edit-Mode-Zeile (PIN-Freischaltung) */
 
 .settings-edit-row {
@@ -216,7 +237,7 @@ input:disabled {
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
 }
 
 .settings-edit-hint {
@@ -634,7 +655,7 @@ button:active {
     font-size: 1.1rem;
   }
 
-  button {
+  button:not(.icon-button) {
     width: 100%;
     max-width: 320px;
   }
