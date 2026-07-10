@@ -7,8 +7,9 @@ Bombe (Plant), das gegnerische Team versucht, sie vor Ablauf des Countdowns zu
 Explosion.
 
 Die App ist als reine Statik-Seite (HTML/CSS/JS, kein Build, keine Abhängigkeiten)
-umgesetzt und auf den Einsatz auf Smartphones/Tablets optimiert (Touch, Vibration,
-Vollbild).
+umgesetzt und auf den Einsatz auf Smartphones/Tablets optimiert (Touch, Vibration).
+Als installierte PWA läuft sie über Chrome bereits im Vollbildmodus (siehe
+`manifest.webmanifest`, `"display": "fullscreen"`).
 
 ## Funktionen
 
@@ -29,7 +30,7 @@ Vollbild).
   - Countdown-Länge (10–300 s, Default 45 s)
 - **PIN-Schutz der Einstellungen:** Anzeigen ist frei, **Ändern** erst nach Eingabe
   des PIN im Edit-Mode (Button „🔒 Bearbeiten"). **PIN: `9999`** (siehe unten).
-- **Vollbildmodus** und ein-/ausblendbares Einstellungs-Panel.
+- **Ein-/ausblendbares Einstellungs-Panel.**
 - **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in
   `localStorage` gespeichert. Nach einem versehentlichen Neuladen wird der Lauf exakt
   dort fortgesetzt (Defuse-Panel + Beep wieder aktiv). Abgelaufene Stände werden verworfen.
@@ -72,7 +73,7 @@ nerf-bomb/
 ## Lokal starten
 
 Keine Build-Schritte nötig. Entweder `index.html` direkt im Browser öffnen oder einen
-einfachen Webserver verwenden (empfohlen, damit Audio/Fullscreen zuverlässig sind):
+einfachen Webserver verwenden (empfohlen, damit Audio-Wiedergabe zuverlässig ist):
 
 ```bash
 python3 -m http.server 8000

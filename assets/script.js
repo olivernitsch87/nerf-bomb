@@ -15,7 +15,6 @@ const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
 const settingsEditToggle = document.getElementById("settingsEditToggle");
 const settingsEditHint = document.getElementById("settingsEditHint");
-const fullscreenButton = document.getElementById("fullscreenButton");
 const keepAliveToggle = document.getElementById("keepAliveToggle");
 const resetButton = document.getElementById("resetButton");
 
@@ -409,21 +408,6 @@ settingsEditToggle.addEventListener("click", () => {
     setSettingsEditMode(false);
   }
 });
-
-/* Vollbildmodus */
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-}
-
-fullscreenButton.addEventListener("click", toggleFullscreen);
 
 keepAliveToggle.addEventListener("click", () => {
   if (keepAliveActive) {

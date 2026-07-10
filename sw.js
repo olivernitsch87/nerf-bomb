@@ -3,7 +3,7 @@
    vollständig offline funktioniert – inkl. aller Sounds und auch
    nach einem Reload bei Verbindungsabbruch. */
 
-const CACHE = "nerf-bomb-v4";
+const CACHE = "nerf-bomb-v5";
 
 const ASSETS = [
   "./",
