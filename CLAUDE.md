@@ -122,9 +122,37 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   damit ein späterer App-Start nicht mit einem veralteten Endbildschirm öffnet.
 - `detonate()` kapselt die Explosion (vorher inline im Tick).
 
-### Bluetooth-Keep-Alive („▶ Spiel starten"-Button)
-- `startKeepAlive()` / `stopKeepAlive()`, getoggled über den Button
-  `keepAliveToggle` im Top-Bar. Bewusst **kein** Screen Wake Lock, da der
+### Rundenzeit-Timer (eigenständig von der Bombe)
+- Über den Menüeintrag `roundTimerToggle` ("⏱ Runde starten"/"⏱ Runde
+  beenden") start-/stoppbar – **unabhängig** von `bombActive`, damit die
+  App auch als reiner Zeitgeber für andere Spielmodi (z. B. Capture the
+  Flag) nutzbar ist, ganz ohne die Numpad-Mechanik.
+- Zwei Einstellungen in `settingsPanel`: `roundTimeInput` (Minuten) und
+  `roundUnlimitedInput` (Checkbox „Unbegrenzt"). Persistiert unter
+  `localStorage["roundTime"]`/`["roundUnlimited"]`, gesperrt hinter
+  `settingsLocked` wie die übrigen Einstellungsfelder (nicht zusätzlich an
+  `bombActive` gekoppelt).
+- Reload-sicher nach demselben Prinzip wie der Bomben-Countdown, aber über
+  einen eigenen Storage-Key `localStorage["nerfRoundState"]`:
+  Countdown-Modus speichert `{ mode: "countdown", endTime }`,
+  Stoppuhr-Modus (`unbegrenzt`) speichert `{ mode: "stopwatch", startTime }`.
+  `restoreRoundState()` läuft neben `restoreBombState()` beim Laden.
+- **Bei Ablauf der gesetzten Rundenzeit** (nur Countdown-Modus): einmaliger
+  Alarm (`speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])` +
+  `.warning`-Klasse auf der Anzeige). Der Timer **stoppt dabei nicht**,
+  sondern zählt als Überzeit (`+MM:SS`) weiter – das Spiel soll dadurch
+  nicht unterbrochen werden. Beim Resume eines bereits abgelaufenen
+  Countdowns wird der Alarm bewusst **nicht** erneut ausgelöst (sonst würde
+  jeder Reload während der Überzeit erneut ansagen).
+- **Automatisches Beenden als Komfortfunktion** (zusätzlich zum manuellen
+  Button, nicht als Ersatz): `stopRoundTimer()` wird auch in `detonate()`,
+  im Entschärfen-Callback und im „Neues Spiel"-Handler aufgerufen.
+- Anzeige immer sichtbar (`roundTimerDisplay`, leer solange nicht aktiv),
+  analog zum Punktestand-Mini-Display.
+
+### Bluetooth-Keep-Alive („🔊 Bluetooth wach halten"-Button)
+- `startKeepAlive()` / `stopKeepAlive()`, getoggled über den Menüeintrag
+  `keepAliveToggle` (Burger-Menü). Bewusst **kein** Screen Wake Lock, da der
   Bildschirm normal sperrbar bleiben soll (Smartphone wandert oft für
   mehrere Minuten in einen Rucksack, bevor überhaupt scharf geschaltet wird).
 - Grund: Android/Chrome friert einen Tab im Hintergrund (Bildschirm gesperrt)

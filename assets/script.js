@@ -25,6 +25,10 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 const scoreValueA = document.getElementById("scoreValueA");
 const scoreValueB = document.getElementById("scoreValueB");
 const scoreResetButton = document.getElementById("scoreResetButton");
+const roundTimeInput = document.getElementById("roundTimeInput");
+const roundUnlimitedInput = document.getElementById("roundUnlimitedInput");
+const roundTimerToggle = document.getElementById("roundTimerToggle");
+const roundTimerDisplay = document.getElementById("roundTimerDisplay");
 
 let holdInterval;
 let animateInterval;
@@ -37,6 +41,9 @@ let keepAliveCtx = null;
 let keepAliveSource = null;
 let scoreA = parseInt(localStorage.getItem("scoreA"), 10) || 0;
 let scoreB = parseInt(localStorage.getItem("scoreB"), 10) || 0;
+let roundTimerActive = false;
+let roundTimerInterval = null;
+let roundTimerAlarmed = false;
 
 /* Edit-Mode der Einstellungen.
    Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
@@ -74,6 +81,37 @@ function loadBombState() {
 function clearBombState() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    /* ignorieren */
+  }
+}
+
+/* Persistenz des Rundenzeit-Timers (reload-sicher, unabhängig vom
+   Bomben-Countdown – der Timer soll auch ohne Bombe nutzbar sein,
+   z. B. für Capture the Flag). Gleiches endzeit-/startzeitbasierte
+   Prinzip wie beim Bomben-Countdown. */
+
+const ROUND_STORAGE_KEY = "nerfRoundState";
+
+function saveRoundState(state) {
+  try {
+    localStorage.setItem(ROUND_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    /* localStorage nicht verfügbar */
+  }
+}
+
+function loadRoundState() {
+  try {
+    return JSON.parse(localStorage.getItem(ROUND_STORAGE_KEY));
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearRoundState() {
+  try {
+    localStorage.removeItem(ROUND_STORAGE_KEY);
   } catch (e) {
     /* ignorieren */
   }
@@ -183,7 +221,7 @@ function startKeepAlive() {
     }
 
     keepAliveActive = true;
-    keepAliveToggle.textContent = "⏸ Beenden";
+    keepAliveToggle.textContent = "🔇 Beenden";
   } catch (e) {
     /* Web Audio nicht verfügbar – ignorieren */
   }
@@ -206,7 +244,82 @@ function stopKeepAlive() {
     navigator.mediaSession.playbackState = "none";
   }
   keepAliveActive = false;
-  keepAliveToggle.textContent = "▶ Spiel starten";
+  keepAliveToggle.textContent = "🔊 Bluetooth wach halten";
+}
+
+/* Rundenzeit-Timer: eigenständig von der Bombe start-/stoppbar, damit die
+   App auch für andere Spielmodi (z. B. Capture the Flag) als reiner
+   Zeitgeber nutzbar ist. Countdown-Modus zeigt die Restzeit; bei Erreichen
+   von 0 ertönt ein einmaliger Alarm, danach läuft die Anzeige als Überzeit
+   weiter, statt bei "00:00" einzufrieren – das Spiel soll dadurch nicht
+   unterbrochen werden. "Unbegrenzt" zählt von Anfang an als Stoppuhr hoch. */
+
+function formatRoundTime(totalSeconds) {
+  const s = Math.max(0, Math.round(totalSeconds));
+  const minutes = Math.floor(s / 60);
+  const seconds = s % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function startRoundTimer(resumeState) {
+  clearInterval(roundTimerInterval);
+
+  const isResume = !!resumeState;
+  const unlimited = isResume ? resumeState.mode === "stopwatch" : roundUnlimitedInput.checked;
+  let endTime = null;
+  let startTime = null;
+
+  if (unlimited) {
+    startTime = isResume ? resumeState.startTime : Date.now();
+    if (!isResume) saveRoundState({ mode: "stopwatch", startTime });
+  } else if (isResume) {
+    endTime = resumeState.endTime;
+  } else {
+    const minutes = parseInt(roundTimeInput.value, 10);
+    endTime = Date.now() + minutes * 60000;
+    saveRoundState({ mode: "countdown", endTime });
+  }
+
+  // Beim Resume eines bereits abgelaufenen Countdowns nicht erneut Alarm
+  // auslösen (sonst würde jeder Reload während der Überzeit erneut ansagen).
+  roundTimerAlarmed = !unlimited && isResume && endTime <= Date.now();
+
+  roundTimerActive = true;
+  roundTimerToggle.textContent = "⏱ Runde beenden";
+
+  function tick() {
+    if (unlimited) {
+      const elapsed = (Date.now() - startTime) / 1000;
+      roundTimerDisplay.textContent = `⏱ ${formatRoundTime(elapsed)}`;
+      return;
+    }
+    const remaining = (endTime - Date.now()) / 1000;
+    if (remaining <= 0) {
+      if (!roundTimerAlarmed) {
+        roundTimerAlarmed = true;
+        speak("Rundenzeit abgelaufen");
+        vibrate([200, 100, 200]);
+        roundTimerDisplay.classList.add("warning");
+      }
+      roundTimerDisplay.textContent = `⏱ +${formatRoundTime(-remaining)}`;
+    } else {
+      roundTimerDisplay.textContent = `⏱ ${formatRoundTime(remaining)}`;
+    }
+  }
+
+  tick();
+  roundTimerInterval = setInterval(tick, 1000);
+}
+
+function stopRoundTimer() {
+  clearInterval(roundTimerInterval);
+  roundTimerInterval = null;
+  roundTimerActive = false;
+  roundTimerAlarmed = false;
+  roundTimerDisplay.textContent = "";
+  roundTimerDisplay.classList.remove("warning");
+  roundTimerToggle.textContent = "⏱ Runde starten";
+  clearRoundState();
 }
 
 function reset() {
@@ -243,6 +356,8 @@ function refreshInputLocks() {
   holdTimeInput.disabled = armCountdownLocked;
   countdownInput.disabled = armCountdownLocked;
   defuseHoldTimeInput.disabled = settingsLocked;
+  roundTimeInput.disabled = settingsLocked;
+  roundUnlimitedInput.disabled = settingsLocked;
 }
 
 /* Countdown & Sounds */
@@ -304,6 +419,7 @@ function detonate() {
   clearTimeout(beepTimer);
   cancelSpeech();
   clearBombState();
+  stopRoundTimer();
   countdown = 0;
   timerDisplay.textContent = "💥 BOOM!";
   timerDisplay.classList.add("warning");
@@ -430,6 +546,7 @@ holdButton(defuseButton, () => {
   body.classList.remove("flash");
   bombActive = false;
   clearBombState();
+  stopRoundTimer();
   timerDisplay.textContent = "✅ Entschärft!";
   defused.currentTime = 0;
   defused.play().catch(() => {});
@@ -448,6 +565,12 @@ if (localStorage.getItem("defuseHoldTime")) {
 if (localStorage.getItem("countdownTime")) {
   countdownInput.value = localStorage.getItem("countdownTime");
 }
+if (localStorage.getItem("roundTime")) {
+  roundTimeInput.value = localStorage.getItem("roundTime");
+}
+if (localStorage.getItem("roundUnlimited") === "true") {
+  roundUnlimitedInput.checked = true;
+}
 
 /* Einstellungen speichern bei Änderung */
 holdTimeInput.addEventListener("input", () => {
@@ -460,6 +583,14 @@ defuseHoldTimeInput.addEventListener("input", () => {
 
 countdownInput.addEventListener("input", () => {
   localStorage.setItem("countdownTime", countdownInput.value);
+});
+
+roundTimeInput.addEventListener("input", () => {
+  localStorage.setItem("roundTime", roundTimeInput.value);
+});
+
+roundUnlimitedInput.addEventListener("change", () => {
+  localStorage.setItem("roundUnlimited", roundUnlimitedInput.checked);
 });
 
 /* Einstellungen ein-/ausblenden (Anzeigen ist ohne PIN erlaubt).
@@ -563,9 +694,18 @@ keepAliveToggle.addEventListener("click", () => {
   }
 });
 
+roundTimerToggle.addEventListener("click", () => {
+  if (roundTimerActive) {
+    stopRoundTimer();
+  } else {
+    startRoundTimer();
+  }
+});
+
 resetButton.addEventListener("click", () => {
   reset();
   clearBombState();
+  stopRoundTimer();
   timerDisplay.classList.remove("warning");
   resetButton.classList.add("hidden");
   showArmHideDefuse();
@@ -589,9 +729,22 @@ function restoreBombState() {
   }
 }
 
+/* Laufenden Rundenzeit-Timer nach Reload wiederherstellen (unabhängig vom
+   Bomben-Countdown) */
+function restoreRoundState() {
+  const state = loadRoundState();
+  if (!state) return;
+  if (state.mode === "stopwatch" && typeof state.startTime === "number") {
+    startRoundTimer(state);
+  } else if (state.mode === "countdown" && typeof state.endTime === "number") {
+    startRoundTimer(state);
+  }
+}
+
 /* Initialer Zustand beim Laden */
 setInitialState();
 restoreBombState();
+restoreRoundState();
 
 /* Service Worker für Offline-Betrieb registrieren.
    Sorgt dafür, dass die App (inkl. aller Sounds) auch ohne Netz

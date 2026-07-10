@@ -19,7 +19,8 @@
   </header>
 
   <div id="menuPanel" class="menu hidden">
-    <button id="keepAliveToggle" class="icon-button">▶ Spiel starten</button>
+    <button id="roundTimerToggle" class="icon-button">⏱ Runde starten</button>
+    <button id="keepAliveToggle" class="icon-button">🔊 Bluetooth wach halten</button>
     <button id="scoreToggle" class="icon-button">🏆 Punktestand</button>
     <button id="settingsToggle" class="icon-button">⚙️ Einstellungen</button>
   </div>
@@ -30,6 +31,7 @@
       <button class="icon-button panel-close" data-panel="settingsPanel" aria-label="Schließen">✕</button>
     </div>
     <p class="settings-hint">Hinweis: Das haptische Feedback muss in den Systemeinstellungen aktiviert sein, damit die Vibrations-Effekte funktionieren.</p>
+    <p class="settings-hint">🔊 Bluetooth wach halten hält die Verbindung zur Lautsprecherbox auch bei gesperrtem Bildschirm aktiv (z. B. während die Bombe im Rucksack getragen wird).</p>
     <p class="settings-hint">Tipp: Bei größeren Spielfeldern zusätzlich per Microsoft Teams verbinden (Freisprechen an, Kamera/Mikro aus) und auf dem Bomben-Handy Bildschirm + Systemaudio teilen – so hören alle Beep, Ansagen und Explosion auch über Distanz, wie Comms bei Taktik-Shootern.</p>
     <div class="settings-edit-row">
       <button id="settingsEditToggle" class="icon-button" type="button">🔒 Bearbeiten</button>
@@ -46,6 +48,14 @@
     <label>
       Countdown-Länge (Sekunden):
       <input type="number" id="countdownInput" value="45" min="10" max="300">
+    </label>
+    <label>
+      Rundenzeit (Minuten):
+      <input type="number" id="roundTimeInput" value="10" min="1" max="180">
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" id="roundUnlimitedInput">
+      Unbegrenzt (Stoppuhr statt Countdown)
     </label>
   </section>
 
@@ -70,6 +80,7 @@
   </section>
 
   <div class="score-display" id="scoreDisplay">A 0 : 0 B</div>
+  <div class="round-timer-display" id="roundTimerDisplay"></div>
 
   <main>
     <div class="button-row">

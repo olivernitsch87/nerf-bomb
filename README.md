@@ -34,9 +34,13 @@ Als installierte PWA läuft sie über Chrome bereits im Vollbildmodus (siehe
   Burger-Menü (🏆 Punktestand), mit `+1`/`-1` je Team und
   Zurücksetzen-Option. Ein immer sichtbares Mini-Scoreboard zeigt den
   aktuellen Stand (z. B. „A 3 : 2 B"), persistiert in `localStorage`.
-- **Burger-Menü (☰):** Bündelt Spiel starten (Bluetooth-Keep-Alive),
-  Punktestand und Einstellungen, damit die Top-Bar auf kleinen Bildschirmen
-  übersichtlich bleibt.
+- **Burger-Menü (☰):** Bündelt Rundenzeit-Timer, Bluetooth wach halten
+  (Keep-Alive), Punktestand und Einstellungen, damit die Top-Bar auf
+  kleinen Bildschirmen übersichtlich bleibt.
+- **Rundenzeit-Timer:** Eigenständiger Timer, unabhängig von der
+  Nerf-Bomb-Mechanik nutzbar (z. B. für Capture the Flag) – manuell
+  gesetzte Rundenzeit (Countdown, mit Alarm + Überzeit-Anzeige bei Ablauf)
+  oder „Unbegrenzt" (Stoppuhr). Immer sichtbare Anzeige, reload-sicher.
 - **Ein-/ausblendbares Einstellungs-Panel.**
 - **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in
   `localStorage` gespeichert. Nach einem versehentlichen Neuladen wird der Lauf exakt
