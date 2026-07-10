@@ -39,8 +39,9 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
 - Die Numpad-Codes (`4 2 7 1 9` / `3 8 5 2 1`) sind **nur Animation**, keine echte
   Code-Prüfung. Auslöser ist ausschließlich die Haltedauer.
 - **`vibrate()`** kapselt `navigator.vibrate` (No-op, wenn nicht unterstützt – z. B. iOS).
-- Explosions-Vibration ist via `setTimeout(..., 5000)` verzögert – wirkt erst 5 s nach
-  „BOOM!" (potenzielle Inkonsistenz, falls vorher „Neues Spiel" gedrückt wird).
+- Explosions-Vibration ist via `setTimeout(..., 5000)` verzögert – das ist
+  **beabsichtigt**, da der eigentliche Knall in `explosion.mp3` erst gegen Ende
+  des Clips ertönt und die Vibration damit synchron dazu ausgelöst wird.
 - Einstellungen werden in `localStorage` unter `holdTime` / `defuseHoldTime` /
   `countdownTime` persistiert.
 - Haltezeit ist **getrennt** für Scharfschalten (`holdTimeInput`) und Entschärfen
@@ -48,6 +49,27 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Haltezeit gewählt.
 - Während aktiver Bombe sind `holdTimeInput` und `countdownInput` disabled
   (gelten nur beim Arm-Zeitpunkt).
+
+### Gesprochene Countdown-Ansage
+- `SPEECH_THRESHOLDS = [60, 30, 10, 5]` (Sekunden Restzeit) – bei jeder
+  Schwelle sagt `speak()` per **Web Speech API**
+  (`SpeechSynthesisUtterance`, `lang = "de-DE"`) „Noch N Sekunden" an,
+  zusätzlich zum Beep. Zweck: Restzeit ist hörbar, ohne dass jemand aufs
+  Display schauen muss (z. B. während die Bombe im Rucksack getragen wird).
+- Ausgelöst wird pro Tick in `startCountdown()` über
+  `announceThresholdCrossings(previousCountdown, countdown)`: eine Schwelle
+  wird angesagt, wenn die Restzeit **von darüber auf darunter/gleich
+  wechselt** – nicht bei exaktem Sekundenvergleich. Dadurch robust gegen
+  ausgelassene Ticks (Hintergrund-Throttling) und automatisch
+  reload-/resume-sicher, da `previousCountdown` bei jedem `startCountdown()`-
+  Aufruf frisch mit dem ersten berechneten `countdown`-Wert initialisiert
+  wird (keine rückwirkende Ansage bereits verstrichener Schwellen nach
+  einem Resume).
+- `cancelSpeech()` (`speechSynthesis.cancel()`) wird in `reset()`,
+  `detonate()` und dem Entschärfen-Callback aufgerufen, damit keine Ansage
+  aus einer beendeten Runde in die nächste hineinspricht.
+- Feature-Detection über `"speechSynthesis" in window`, No-op sonst –
+  gleiches Muster wie `vibrate()`.
 
 ### Einstellungen-PIN / Edit-Mode
 - **PIN: `9999`** – Konstante `SETTINGS_PIN` in `assets/script.js`.

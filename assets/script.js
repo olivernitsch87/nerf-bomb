@@ -34,6 +34,11 @@ let keepAliveSource = null;
 const SETTINGS_PIN = "9999";
 let settingsLocked = true;
 
+/* Restzeit-Schwellen (Sekunden), bei denen zusätzlich zum Beep eine
+   gesprochene Ansage erfolgt – hörbar, ohne dass jemand aufs Display
+   schauen muss (z. B. während die Bombe im Rucksack getragen wird). */
+const SPEECH_THRESHOLDS = [60, 30, 10, 5];
+
 /* Persistenz des laufenden Countdowns (reload-sicher)
    Es wird nur der aktive Lauf gespeichert: der absolute Endzeitpunkt.
    So kann nach einem versehentlichen Reload exakt weitergemacht werden. */
@@ -70,6 +75,35 @@ function vibrate(pattern) {
   if (navigator.vibrate) {
     navigator.vibrate(pattern);
   }
+}
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  try {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "de-DE";
+    speechSynthesis.speak(utterance);
+  } catch (e) {
+    /* Sprachausgabe nicht verfügbar – ignorieren */
+  }
+}
+
+function cancelSpeech() {
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+  }
+}
+
+/* Ansage ausgelöst durch den Übergang über eine Schwelle (statt exaktem
+   Sekundenvergleich) – robust gegen ausgelassene Ticks bei Hintergrund-
+   Throttling und automatisch reload-sicher, da beim Resume kein Vergleich
+   vor dem ersten Tick stattfindet. */
+function announceThresholdCrossings(previousCountdown, currentCountdown) {
+  SPEECH_THRESHOLDS.forEach((threshold) => {
+    if (previousCountdown > threshold && currentCountdown <= threshold) {
+      speak(`Noch ${threshold} Sekunden`);
+    }
+  });
 }
 
 /* Bluetooth-Verbindung (z. B. zur Lautsprecherbox) bei gesperrtem Bildschirm
@@ -136,6 +170,7 @@ function stopKeepAlive() {
 function reset() {
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
+  cancelSpeech();
   timerDisplay.textContent = "";
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
@@ -192,6 +227,7 @@ function startCountdown(resumeEndTime) {
   }
 
   countdown = remainingSeconds();
+  let previousCountdown = countdown;
   timerDisplay.textContent = countdown;
   if (countdown <= 10) {
     timerDisplay.classList.add("warning");
@@ -206,6 +242,8 @@ function startCountdown(resumeEndTime) {
     if (countdown <= 5 && countdown > 0) {
       flashBackground();
     }
+    announceThresholdCrossings(previousCountdown, countdown);
+    previousCountdown = countdown;
     if (countdown <= 0) {
       detonate();
     }
@@ -222,6 +260,7 @@ function detonate() {
   bombActive = false;
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
+  cancelSpeech();
   clearBombState();
   countdown = 0;
   timerDisplay.textContent = "💥 BOOM!";
@@ -344,6 +383,7 @@ holdButton(defuseButton, () => {
   if (!bombActive) return;
   clearInterval(countdownTimer);
   clearTimeout(beepTimer);
+  cancelSpeech();
   timerDisplay.classList.remove("warning");
   body.classList.remove("flash");
   bombActive = false;
