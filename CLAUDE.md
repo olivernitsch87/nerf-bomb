@@ -129,13 +129,40 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Battery-Saver. Erfordert `AudioContext`/`webkitAudioContext`
   (Feature-Detection, No-op sonst); `mediaSession` ist optional.
 
+### Burger-Menü & Punktestand
+- Die Top-Bar enthält nur noch Titel + `menuToggle` (☰). Sekundäre
+  Aktionen (`keepAliveToggle`, `scoreToggle`, `settingsToggle`) liegen als
+  gestapelte Buttons in `menuPanel` (`.hidden`-Toggle wie `settingsPanel`).
+  Grund: ein dritter Top-Bar-Button hätte auf schmalen Bildschirmen erneut
+  das Platzproblem des früheren Vollbild-Buttons erzeugt; das Menü
+  skaliert auch für künftige Assistent-Funktionen.
+- Klick auf einen Button *innerhalb* von `menuPanel` schließt das Menü
+  danach automatisch (ein delegierter Klick-Listener auf `menuPanel`).
+- **Punktestand:** `scoreA`/`scoreB` (State) werden in `localStorage` unter
+  den flachen Keys `scoreA`/`scoreB` persistiert (gleiches Muster wie
+  `holdTime` etc.). `changeScore(team, delta)` ändert und persistiert,
+  clamped nicht unter 0. `updateScoreDisplay()` ist die einzige Stelle, die
+  sowohl das immer sichtbare Mini-Scoreboard (`scoreDisplay`, z. B.
+  „A 3 : 2 B") als auch die Zähler im `scorePanel` aktualisiert.
+- `scorePanel` (Toggle über `scoreToggle` im Menü) bietet `+1`/`-1` je Team
+  sowie `scoreResetButton` (mit `confirm()`-Bestätigung). Bewusst **keine
+  PIN-Sperre** auf Score-Änderungen – anders als Einstellungen werden Punkte
+  während des laufenden Spiels häufig geändert.
+- **Teams-Tipp:** Hinweistext in `settingsPanel` (gleicher Stil wie der
+  Haptik-Hinweis) empfiehlt, sich bei größeren Spielfeldern zusätzlich per
+  Microsoft-Teams-Sitzung zu verbinden (Freisprechen an, Kamera/Mikro aus)
+  und auf dem Bomben-Handy Bildschirm + Systemaudio zu teilen. Das ist ein
+  reiner Nutzer-Workflow mit Bordmitteln von Teams/Android – **kein Code**
+  in der App dafür nötig.
+
 ### Offline-Betrieb (Service Worker)
 - `sw.js` precached alle lokalen Assets (HTML, CSS, JS, Bilder, **alle Sounds**),
   Strategie **cache-first** für Same-Origin-Requests; Cross-Origin (Google Fonts)
   wird durchgereicht (Fallback-Font greift offline).
 - Registrierung am Ende von `script.js` (`navigator.serviceWorker.register("sw.js")`).
-- Cache-Version über `CACHE = "nerf-bomb-v1"` → bei Asset-Änderungen **Version
-  hochzählen**, sonst werden alte Dateien aus dem Cache ausgeliefert.
+- Cache-Version über `CACHE = "nerf-bomb-vN"` (aktuell v7) → bei
+  Asset-Änderungen **Version hochzählen**, sonst werden alte Dateien aus
+  dem Cache ausgeliefert.
 - **Wichtig:** SW läuft nur über `http(s)://`, nicht `file://`. Audio-Plays sind mit
   `.catch(() => {})` abgesichert (Autoplay-Policy nach Reload).
 

@@ -15,15 +15,19 @@
 <body>
   <header class="top-bar">
     <h1>Nerf Bomb</h1>
-    <div class="top-buttons">
-      <button id="keepAliveToggle" class="icon-button">▶ Spiel starten</button>
-      <button id="settingsToggle" class="icon-button">⚙️ Einstellungen</button>
-    </div>
+    <button id="menuToggle" class="icon-button">☰</button>
   </header>
+
+  <div id="menuPanel" class="menu hidden">
+    <button id="keepAliveToggle" class="icon-button">▶ Spiel starten</button>
+    <button id="scoreToggle" class="icon-button">🏆 Punktestand</button>
+    <button id="settingsToggle" class="icon-button">⚙️ Einstellungen</button>
+  </div>
 
   <section id="settingsPanel" class="settings hidden">
     <h2>Einstellungen</h2>
     <p style="font-size: 0.8rem; color: #aaa; margin: 0 0 0.5rem;">Hinweis: Das haptische Feedback muss in den Systemeinstellungen aktiviert sein, damit die Vibrations-Effekte funktionieren.</p>
+    <p style="font-size: 0.8rem; color: #aaa; margin: 0 0 0.5rem;">Tipp: Bei größeren Spielfeldern zusätzlich per Microsoft Teams verbinden (Freisprechen an, Kamera/Mikro aus) und auf dem Bomben-Handy Bildschirm + Systemaudio teilen – so hören alle Beep, Ansagen und Explosion auch über Distanz, wie Comms bei Taktik-Shootern.</p>
     <div class="settings-edit-row">
       <button id="settingsEditToggle" class="icon-button" type="button">🔒 Bearbeiten</button>
       <span id="settingsEditHint" class="settings-edit-hint">Zum Ändern PIN eingeben.</span>
@@ -41,6 +45,25 @@
       <input type="number" id="countdownInput" value="45" min="10" max="300">
     </label>
   </section>
+
+  <section id="scorePanel" class="settings hidden">
+    <h2>Punktestand</h2>
+    <div class="score-row">
+      <span class="score-team-label">Team A</span>
+      <button class="icon-button score-btn" data-team="A" data-delta="-1">-1</button>
+      <span class="score-value" id="scoreValueA">0</span>
+      <button class="icon-button score-btn" data-team="A" data-delta="1">+1</button>
+    </div>
+    <div class="score-row">
+      <span class="score-team-label">Team B</span>
+      <button class="icon-button score-btn" data-team="B" data-delta="-1">-1</button>
+      <span class="score-value" id="scoreValueB">0</span>
+      <button class="icon-button score-btn" data-team="B" data-delta="1">+1</button>
+    </div>
+    <button id="scoreResetButton" class="icon-button">Punktestand zurücksetzen</button>
+  </section>
+
+  <div class="score-display" id="scoreDisplay">A 0 : 0 B</div>
 
   <main>
     <div class="button-row">

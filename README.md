@@ -30,6 +30,13 @@ Als installierte PWA läuft sie über Chrome bereits im Vollbildmodus (siehe
   - Countdown-Länge (10–300 s, Default 45 s)
 - **PIN-Schutz der Einstellungen:** Anzeigen ist frei, **Ändern** erst nach Eingabe
   des PIN im Edit-Mode (Button „🔒 Bearbeiten"). **PIN: `9999`** (siehe unten).
+- **Punktestand:** Manuelles Zählen der Punkte für Team A/B über das
+  Burger-Menü (🏆 Punktestand), mit `+1`/`-1` je Team und
+  Zurücksetzen-Option. Ein immer sichtbares Mini-Scoreboard zeigt den
+  aktuellen Stand (z. B. „A 3 : 2 B"), persistiert in `localStorage`.
+- **Burger-Menü (☰):** Bündelt Spiel starten (Bluetooth-Keep-Alive),
+  Punktestand und Einstellungen, damit die Top-Bar auf kleinen Bildschirmen
+  übersichtlich bleibt.
 - **Ein-/ausblendbares Einstellungs-Panel.**
 - **Reload-sicher:** Der absolute Endzeitpunkt eines laufenden Countdowns wird in
   `localStorage` gespeichert. Nach einem versehentlichen Neuladen wird der Lauf exakt
@@ -106,3 +113,7 @@ schützt nur vor versehentlichem Verstellen, nicht gegen technisch versierte Nut
 - **Der Service Worker (Offline-Modus) funktioniert nur, wenn die App über einen
   Webserver (`http://`/`https://`) geöffnet wird – nicht per `file://`.** Auf
   GitHub Pages o. ä. funktioniert es automatisch; lokal via `python3 -m http.server`.
+- **Tipp für größere Spielfelder:** Zusätzlich per Microsoft Teams verbinden
+  (Freisprechen an, Kamera/Mikro aus) und auf dem Bomben-Handy Bildschirm +
+  Systemaudio teilen – so hören alle Beep, Ansagen und Explosion auch über
+  Distanz (auch in den Einstellungen der App hinterlegt).

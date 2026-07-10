@@ -17,6 +17,14 @@ const settingsEditToggle = document.getElementById("settingsEditToggle");
 const settingsEditHint = document.getElementById("settingsEditHint");
 const keepAliveToggle = document.getElementById("keepAliveToggle");
 const resetButton = document.getElementById("resetButton");
+const menuToggle = document.getElementById("menuToggle");
+const menuPanel = document.getElementById("menuPanel");
+const scoreToggle = document.getElementById("scoreToggle");
+const scorePanel = document.getElementById("scorePanel");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const scoreValueA = document.getElementById("scoreValueA");
+const scoreValueB = document.getElementById("scoreValueB");
+const scoreResetButton = document.getElementById("scoreResetButton");
 
 let holdInterval;
 let animateInterval;
@@ -27,6 +35,8 @@ let bombActive = false;
 let keepAliveActive = false;
 let keepAliveCtx = null;
 let keepAliveSource = null;
+let scoreA = parseInt(localStorage.getItem("scoreA"), 10) || 0;
+let scoreB = parseInt(localStorage.getItem("scoreB"), 10) || 0;
 
 /* Edit-Mode der Einstellungen.
    Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
@@ -424,6 +434,58 @@ countdownInput.addEventListener("input", () => {
 settingsToggle.addEventListener("click", () => {
   settingsPanel.classList.toggle("hidden");
 });
+
+/* Burger-Menü ein-/ausblenden. Ein Klick auf einen Menüeintrag schließt
+   das Menü danach automatisch wieder (delegierter Listener). */
+menuToggle.addEventListener("click", () => {
+  menuPanel.classList.toggle("hidden");
+});
+
+menuPanel.addEventListener("click", (e) => {
+  if (e.target.closest("button")) {
+    menuPanel.classList.add("hidden");
+  }
+});
+
+/* Punktestand (manuell, persistiert in localStorage) */
+
+function updateScoreDisplay() {
+  scoreDisplay.textContent = `A ${scoreA} : ${scoreB} B`;
+  scoreValueA.textContent = scoreA;
+  scoreValueB.textContent = scoreB;
+}
+
+function changeScore(team, delta) {
+  if (team === "A") {
+    scoreA = Math.max(0, scoreA + delta);
+    localStorage.setItem("scoreA", scoreA);
+  } else {
+    scoreB = Math.max(0, scoreB + delta);
+    localStorage.setItem("scoreB", scoreB);
+  }
+  updateScoreDisplay();
+}
+
+document.querySelectorAll(".score-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    changeScore(btn.dataset.team, parseInt(btn.dataset.delta, 10));
+  });
+});
+
+scoreToggle.addEventListener("click", () => {
+  scorePanel.classList.toggle("hidden");
+});
+
+scoreResetButton.addEventListener("click", () => {
+  if (!confirm("Punktestand wirklich zurücksetzen?")) return;
+  scoreA = 0;
+  scoreB = 0;
+  localStorage.setItem("scoreA", scoreA);
+  localStorage.setItem("scoreB", scoreB);
+  updateScoreDisplay();
+});
+
+updateScoreDisplay();
 
 /* Edit-Mode der Einstellungen per PIN freischalten/sperren */
 function setSettingsEditMode(unlocked) {
