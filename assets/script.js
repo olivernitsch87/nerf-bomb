@@ -16,6 +16,7 @@ const settingsPanel = document.getElementById("settingsPanel");
 const settingsEditToggle = document.getElementById("settingsEditToggle");
 const settingsEditHint = document.getElementById("settingsEditHint");
 const fullscreenButton = document.getElementById("fullscreenButton");
+const keepAliveToggle = document.getElementById("keepAliveToggle");
 const resetButton = document.getElementById("resetButton");
 
 let holdInterval;
@@ -24,6 +25,9 @@ let countdownTimer;
 let beepTimer;
 let countdown = 0;
 let bombActive = false;
+let keepAliveActive = false;
+let keepAliveCtx = null;
+let keepAliveSource = null;
 
 /* Edit-Mode der Einstellungen.
    Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
@@ -67,6 +71,67 @@ function vibrate(pattern) {
   if (navigator.vibrate) {
     navigator.vibrate(pattern);
   }
+}
+
+/* Bluetooth-Verbindung (z. B. zur Lautsprecherbox) bei gesperrtem Bildschirm
+   halten. Das Smartphone wandert oft für mehrere Minuten in einen Rucksack,
+   bevor überhaupt scharf geschaltet wird – der Bildschirm soll dabei ganz
+   normal sperrbar bleiben (kein Wake Lock). Android/Chrome friert einen Tab
+   im Hintergrund aber ein und trennt dabei Bluetooth, außer der Tab spielt
+   aktiv Medien ab (wie eine Musik-App). Daher wird bei Bedarf ein praktisch
+   unhörbarer Dauerton per Web Audio API erzeugt, der nur diesen Zweck erfüllt.
+   Läuft rein innerhalb der Seite – wird der Tab/die App geschlossen, endet
+   der Ton automatisch mit. */
+function startKeepAlive() {
+  if (keepAliveActive) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  try {
+    keepAliveCtx = new AudioCtx();
+    const sampleRate = keepAliveCtx.sampleRate;
+    const buffer = keepAliveCtx.createBuffer(1, sampleRate, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = Math.sin((2 * Math.PI * 20 * i) / sampleRate);
+    }
+    const gainNode = keepAliveCtx.createGain();
+    gainNode.gain.value = 0.001;
+    keepAliveSource = keepAliveCtx.createBufferSource();
+    keepAliveSource.buffer = buffer;
+    keepAliveSource.loop = true;
+    keepAliveSource.connect(gainNode).connect(keepAliveCtx.destination);
+    keepAliveSource.start();
+
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: "Nerf Bomb – aktiv" });
+      navigator.mediaSession.playbackState = "playing";
+    }
+
+    keepAliveActive = true;
+    keepAliveToggle.textContent = "⏸ Beenden";
+  } catch (e) {
+    /* Web Audio nicht verfügbar – ignorieren */
+  }
+}
+
+function stopKeepAlive() {
+  if (keepAliveSource) {
+    try {
+      keepAliveSource.stop();
+    } catch (e) {
+      /* bereits gestoppt */
+    }
+    keepAliveSource = null;
+  }
+  if (keepAliveCtx) {
+    keepAliveCtx.close().catch(() => {});
+    keepAliveCtx = null;
+  }
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.playbackState = "none";
+  }
+  keepAliveActive = false;
+  keepAliveToggle.textContent = "▶ Spiel starten";
 }
 
 function reset() {
@@ -359,6 +424,14 @@ function toggleFullscreen() {
 }
 
 fullscreenButton.addEventListener("click", toggleFullscreen);
+
+keepAliveToggle.addEventListener("click", () => {
+  if (keepAliveActive) {
+    stopKeepAlive();
+  } else {
+    startKeepAlive();
+  }
+});
 
 resetButton.addEventListener("click", () => {
   reset();

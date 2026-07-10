@@ -77,6 +77,36 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   damit ein späterer App-Start nicht mit einem veralteten Endbildschirm öffnet.
 - `detonate()` kapselt die Explosion (vorher inline im Tick).
 
+### Bluetooth-Keep-Alive („▶ Spiel starten"-Button)
+- `startKeepAlive()` / `stopKeepAlive()`, getoggled über den Button
+  `keepAliveToggle` im Top-Bar. Bewusst **kein** Screen Wake Lock, da der
+  Bildschirm normal sperrbar bleiben soll (Smartphone wandert oft für
+  mehrere Minuten in einen Rucksack, bevor überhaupt scharf geschaltet wird).
+- Grund: Android/Chrome friert einen Tab im Hintergrund (Bildschirm gesperrt)
+  ein und trennt dabei eine per Bluetooth verbundene Box (z. B. JBL) – außer
+  der Tab spielt aktiv Medien ab (wie eine Musik-App). Daher erzeugt
+  `startKeepAlive()` per Web Audio API einen dauerhaften, sehr leisen
+  Sinuston (Gain `0.001`, praktisch unhörbar) über einen loopenden
+  `AudioBufferSourceNode` und setzt zusätzlich
+  `navigator.mediaSession.playbackState = "playing"`, damit Android den Tab
+  zuverlässig als aktive Medienwiedergabe erkennt.
+- Bewusst **keine Audiodatei**: Der Ton wird zur Laufzeit synthetisiert
+  (kein neues Asset unter `assets/`), da es rein technischen Zweck erfüllt
+  und nicht als Musik/Sound wahrgenommen werden soll.
+- Der Modus ist ein reiner An/Aus-Umschalter, unabhängig von `bombActive`
+  und läuft bewusst über mehrere Runden (Scharfschalten, Countdown,
+  Entschärfen/Explosion, „Neues Spiel") hinweg weiter, bis er explizit über
+  den Button beendet wird.
+- **Sichtbarer Nebeneffekt:** Android zeigt während der aktiven Wiedergabe
+  eine Medien-Benachrichtigung/Sperrbildschirm-Steuerung an – das ist
+  erwartet und nötig, damit der Trick funktioniert.
+- **Grenzen:** Rein an den Lebenszyklus der Seite gebunden (kein Service
+  Worker, kein systemweiter Dienst) – wird der Tab/die App hart geschlossen
+  (App-Switcher wegwischen), endet der Ton automatisch mit. Kein Schutz vor
+  manuellem Sperren mit gleichzeitigem Task-Kill oder aggressivem
+  Battery-Saver. Erfordert `AudioContext`/`webkitAudioContext`
+  (Feature-Detection, No-op sonst); `mediaSession` ist optional.
+
 ### Offline-Betrieb (Service Worker)
 - `sw.js` precached alle lokalen Assets (HTML, CSS, JS, Bilder, **alle Sounds**),
   Strategie **cache-first** für Same-Origin-Requests; Cross-Origin (Google Fonts)
