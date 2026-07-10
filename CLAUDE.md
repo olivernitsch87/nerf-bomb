@@ -70,6 +70,16 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   aus einer beendeten Runde in die nächste hineinspricht.
 - Feature-Detection über `"speechSynthesis" in window`, No-op sonst –
   gleiches Muster wie `vibrate()`.
+- **Stimmenauswahl für Offline-Betrieb:** `pickGermanVoice()` wählt aus
+  `speechSynthesis.getVoices()` gezielt eine deutsche Stimme mit
+  `localService === true` (geräteeigen, funktioniert offline) statt einer
+  netzwerkbasierten Google-Cloud-Stimme, die bei Internetausfall stumm
+  bleiben würde. Da die Stimmenliste asynchron nachlädt, wird zusätzlich
+  auf das `voiceschanged`-Event reagiert. **Voraussetzung auf dem Gerät:**
+  In den Android-Systemeinstellungen unter „Sprachausgabe" (Text-to-Speech)
+  muss die deutsche Stimme als Sprachpaket heruntergeladen sein – ist gar
+  keine deutsche Stimme installiert, bleibt die Ansage stumm, unabhängig
+  vom Code (kein rein clientseitig lösbares Problem).
 
 ### Einstellungen-PIN / Edit-Mode
 - **PIN: `9999`** – Konstante `SETTINGS_PIN` in `assets/script.js`.

@@ -87,11 +87,36 @@ function vibrate(pattern) {
   }
 }
 
+/* Deutsche Stimme für die Sprachausgabe auswählen. Android/Chrome bieten oft
+   sowohl eine geräteeigene ("localService": true, funktioniert offline) als
+   auch eine netzwerkbasierte Stimme (Google-Cloud-TTS) für Deutsch an – ohne
+   explizite Auswahl kann Chrome eine Netzwerk-Stimme wählen, die bei
+   Verbindungsabbruch stumm bleibt. Stimmenliste lädt asynchron nach, daher
+   zusätzlich auf "voiceschanged" reagieren. */
+let speechVoice = null;
+
+function pickGermanVoice() {
+  if (!("speechSynthesis" in window)) return null;
+  const germanVoices = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith("de"));
+  if (!germanVoices.length) return null;
+  return germanVoices.find((v) => v.localService) || germanVoices[0];
+}
+
+if ("speechSynthesis" in window) {
+  speechVoice = pickGermanVoice();
+  speechSynthesis.addEventListener("voiceschanged", () => {
+    speechVoice = pickGermanVoice();
+  });
+}
+
 function speak(text) {
   if (!("speechSynthesis" in window)) return;
   try {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
+    if (speechVoice) {
+      utterance.voice = speechVoice;
+    }
     speechSynthesis.speak(utterance);
   } catch (e) {
     /* Sprachausgabe nicht verfügbar – ignorieren */
