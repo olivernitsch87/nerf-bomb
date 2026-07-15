@@ -77,12 +77,16 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
 - Feature-Detection über `"speechSynthesis" in window`, No-op sonst –
   gleiches Muster wie `vibrate()`.
 - **`speak()` ruft `speechSynthesis.cancel()` auf, bevor es eine neue
-  Utterance startet** (Bugfix): Chrome hat einen bekannten Bug, bei dem eine
+  Utterance startet, und direkt danach zusätzlich `speechSynthesis.resume()`**
+  (Bugfix): Browser haben einen bekannten Bug, bei dem eine
   hängende/unvollständige Warteschlange spätere `speak()`-Aufrufe stumm
   verpuffen lässt – fiel besonders bei den alle 10s wiederholten
   Rundenzeit-Überzeit-Alarmen auf (nur die erste Ansage kam, spätere nicht
-  mehr). `cancel()` vor jedem `speak()` räumt die Warteschlange zuverlässig
-  auf.
+  mehr). `cancel()` vor jedem `speak()` räumt die Warteschlange auf; ein
+  `cancel()` direkt gefolgt von `speak()` lässt die neue Utterance aber in
+  manchen Browsern ohne ein nachfolgendes `resume()` wortlos verschwinden
+  (kein Fehler, keine Ausgabe) – das `resume()` direkt nach `speak()` behebt
+  genau das.
 - **Stimmenauswahl für Offline-Betrieb:** `pickGermanVoice()` wählt aus
   `speechSynthesis.getVoices()` gezielt eine deutsche Stimme mit
   `localService === true` (geräteeigen, funktioniert offline) statt einer
