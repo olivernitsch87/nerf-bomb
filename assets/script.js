@@ -44,6 +44,7 @@ let scoreB = parseInt(localStorage.getItem("scoreB"), 10) || 0;
 let roundTimerActive = false;
 let roundTimerInterval = null;
 let roundTimerAlarmed = false;
+let roundTimerNextOvertimeAlarm = 0;
 
 /* Edit-Mode der Einstellungen.
    Anzeigen ist immer erlaubt; Ändern erst nach PIN-Eingabe.
@@ -280,9 +281,15 @@ function startRoundTimer(resumeState) {
     saveRoundState({ mode: "countdown", endTime });
   }
 
-  // Beim Resume eines bereits abgelaufenen Countdowns nicht erneut Alarm
-  // auslösen (sonst würde jeder Reload während der Überzeit erneut ansagen).
-  roundTimerAlarmed = !unlimited && isResume && endTime <= Date.now();
+  // Beim Resume eines bereits abgelaufenen Countdowns nicht sofort erneut
+  // Alarm auslösen (sonst würde jeder Reload während der Überzeit erneut
+  // ansagen) - die 10s-Wiederholung läuft aber ab dem nächsten künftigen
+  // Vielfachen nahtlos weiter.
+  const alreadyExpired = !unlimited && isResume && endTime <= Date.now();
+  roundTimerAlarmed = alreadyExpired;
+  roundTimerNextOvertimeAlarm = alreadyExpired
+    ? (Math.floor((Date.now() - endTime) / 1000 / 10) + 1) * 10
+    : 0;
 
   roundTimerActive = true;
   roundTimerToggle.textContent = "⏱ Runde beenden";
@@ -295,13 +302,15 @@ function startRoundTimer(resumeState) {
     }
     const remaining = (endTime - Date.now()) / 1000;
     if (remaining <= 0) {
-      if (!roundTimerAlarmed) {
+      const overtime = -remaining;
+      if (!roundTimerAlarmed || overtime >= roundTimerNextOvertimeAlarm) {
         roundTimerAlarmed = true;
         speak("Rundenzeit abgelaufen");
         vibrate([200, 100, 200]);
         roundTimerDisplay.classList.add("warning");
+        roundTimerNextOvertimeAlarm += 10;
       }
-      roundTimerDisplay.textContent = `⏱ +${formatRoundTime(-remaining)}`;
+      roundTimerDisplay.textContent = `⏱ +${formatRoundTime(overtime)}`;
     } else {
       roundTimerDisplay.textContent = `⏱ ${formatRoundTime(remaining)}`;
     }
@@ -316,6 +325,7 @@ function stopRoundTimer() {
   roundTimerInterval = null;
   roundTimerActive = false;
   roundTimerAlarmed = false;
+  roundTimerNextOvertimeAlarm = 0;
   roundTimerDisplay.textContent = "";
   roundTimerDisplay.classList.remove("warning");
   roundTimerToggle.textContent = "⏱ Runde starten";
