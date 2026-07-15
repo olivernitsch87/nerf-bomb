@@ -76,17 +76,6 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   aus einer beendeten Runde in die nächste hineinspricht.
 - Feature-Detection über `"speechSynthesis" in window`, No-op sonst –
   gleiches Muster wie `vibrate()`.
-- **`speak()` ruft `speechSynthesis.cancel()` auf, bevor es eine neue
-  Utterance startet, und direkt danach zusätzlich `speechSynthesis.resume()`**
-  (Bugfix): Browser haben einen bekannten Bug, bei dem eine
-  hängende/unvollständige Warteschlange spätere `speak()`-Aufrufe stumm
-  verpuffen lässt – fiel besonders bei den alle 10s wiederholten
-  Rundenzeit-Überzeit-Alarmen auf (nur die erste Ansage kam, spätere nicht
-  mehr). `cancel()` vor jedem `speak()` räumt die Warteschlange auf; ein
-  `cancel()` direkt gefolgt von `speak()` lässt die neue Utterance aber in
-  manchen Browsern ohne ein nachfolgendes `resume()` wortlos verschwinden
-  (kein Fehler, keine Ausgabe) – das `resume()` direkt nach `speak()` behebt
-  genau das.
 - **Stimmenauswahl für Offline-Betrieb:** `pickGermanVoice()` wählt aus
   `speechSynthesis.getVoices()` gezielt eine deutsche Stimme mit
   `localService === true` (geräteeigen, funktioniert offline) statt einer
@@ -149,8 +138,8 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Stoppuhr-Modus (`unbegrenzt`) speichert `{ mode: "stopwatch", startTime }`.
   `restoreRoundState()` läuft neben `restoreBombState()` beim Laden.
 - **Bei Ablauf der gesetzten Rundenzeit** (nur Countdown-Modus): Alarm
-  (kurzer `beep` + `speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])`
-  + `.warning`-Klasse auf der Anzeige), der sich danach **alle 10 Sekunden
+  (`speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])` +
+  `.warning`-Klasse auf der Anzeige), der sich danach **alle 10 Sekunden
   Überzeit wiederholt** (Schwellenwert-Variable
   `roundTimerNextOvertimeAlarm`, analog zum Schwellen-Muster der
   Bomben-Countdown-Ansage, aber aufsteigend statt absteigend). Der Timer
@@ -160,15 +149,6 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   erneut ausgelöst (sonst würde jeder Reload während der Überzeit erneut
   ansagen) – die 10s-Wiederholung setzt aber ab dem nächsten künftigen
   Vielfachen nahtlos fort statt komplett zu pausieren.
-- **Der `beep` vor jedem `speak()`-Aufruf ist kein Cosmetic-Detail, sondern
-  Bugfix:** anders als beim Bomben-Countdown (dort hält `adaptiveBeep()` die
-  Audiowiedergabe durchgehend aktiv) lief während der Rundenzeit-Überzeit
-  zuvor **keine** Audiowiedergabe nebenher – dadurch blieb `speak()` auf
-  manchen Geräten nach der ersten Ansage stumm (die Audio-Pipeline
-  "schläft ein", wenn länger keine echte Medienwiedergabe stattfand;
-  dasselbe Grundproblem wie beim Bluetooth-Keep-Alive weiter unten, nur für
-  Sprachausgabe statt Bluetooth-Verbindung). Der kurze `beep` unmittelbar
-  vor `speak()` hält die Pipeline wach.
 - **Automatisches Beenden als Komfortfunktion** (zusätzlich zum manuellen
   Button, nicht als Ersatz): `stopRoundTimer()` wird auch in `detonate()`,
   im Entschärfen-Callback und im „Neues Spiel"-Handler aufgerufen.
