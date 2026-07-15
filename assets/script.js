@@ -158,6 +158,11 @@ if ("speechSynthesis" in window) {
 function speak(text) {
   if (!("speechSynthesis" in window)) return;
   try {
+    // Chrome-Bug: eine hängende/unvollständige Warteschlange lässt spätere
+    // speak()-Aufrufe stumm verpuffen (betrifft v.a. wiederholte Ansagen wie
+    // die 10s-Rundenzeit-Überzeit-Alarme). cancel() vor jedem speak() räumt
+    // die Warteschlange auf und behebt das zuverlässig.
+    speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
     if (speechVoice) {

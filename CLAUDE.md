@@ -76,6 +76,13 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   aus einer beendeten Runde in die nächste hineinspricht.
 - Feature-Detection über `"speechSynthesis" in window`, No-op sonst –
   gleiches Muster wie `vibrate()`.
+- **`speak()` ruft `speechSynthesis.cancel()` auf, bevor es eine neue
+  Utterance startet** (Bugfix): Chrome hat einen bekannten Bug, bei dem eine
+  hängende/unvollständige Warteschlange spätere `speak()`-Aufrufe stumm
+  verpuffen lässt – fiel besonders bei den alle 10s wiederholten
+  Rundenzeit-Überzeit-Alarmen auf (nur die erste Ansage kam, spätere nicht
+  mehr). `cancel()` vor jedem `speak()` räumt die Warteschlange zuverlässig
+  auf.
 - **Stimmenauswahl für Offline-Betrieb:** `pickGermanVoice()` wählt aus
   `speechSynthesis.getVoices()` gezielt eine deutsche Stimme mit
   `localService === true` (geräteeigen, funktioniert offline) statt einer
@@ -137,13 +144,18 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Countdown-Modus speichert `{ mode: "countdown", endTime }`,
   Stoppuhr-Modus (`unbegrenzt`) speichert `{ mode: "stopwatch", startTime }`.
   `restoreRoundState()` läuft neben `restoreBombState()` beim Laden.
-- **Bei Ablauf der gesetzten Rundenzeit** (nur Countdown-Modus): einmaliger
-  Alarm (`speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])` +
-  `.warning`-Klasse auf der Anzeige). Der Timer **stoppt dabei nicht**,
-  sondern zählt als Überzeit (`+MM:SS`) weiter – das Spiel soll dadurch
-  nicht unterbrochen werden. Beim Resume eines bereits abgelaufenen
-  Countdowns wird der Alarm bewusst **nicht** erneut ausgelöst (sonst würde
-  jeder Reload während der Überzeit erneut ansagen).
+- **Bei Ablauf der gesetzten Rundenzeit** (nur Countdown-Modus): Alarm
+  (`speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])` +
+  `.warning`-Klasse auf der Anzeige), der sich danach **alle 10 Sekunden
+  Überzeit wiederholt** (Schwellenwert-Variable
+  `roundTimerNextOvertimeAlarm`, analog zum Schwellen-Muster der
+  Bomben-Countdown-Ansage, aber aufsteigend statt absteigend). Der Timer
+  **stoppt dabei nicht**, sondern zählt als Überzeit (`+MM:SS`) weiter –
+  das Spiel soll dadurch nicht unterbrochen werden. Beim Resume eines
+  bereits abgelaufenen Countdowns wird der erste Alarm bewusst **nicht**
+  erneut ausgelöst (sonst würde jeder Reload während der Überzeit erneut
+  ansagen) – die 10s-Wiederholung setzt aber ab dem nächsten künftigen
+  Vielfachen nahtlos fort statt komplett zu pausieren.
 - **Automatisches Beenden als Komfortfunktion** (zusätzlich zum manuellen
   Button, nicht als Ersatz): `stopRoundTimer()` wird auch in `detonate()`,
   im Entschärfen-Callback und im „Neues Spiel"-Handler aufgerufen.
