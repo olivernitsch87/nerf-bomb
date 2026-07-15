@@ -158,22 +158,12 @@ if ("speechSynthesis" in window) {
 function speak(text) {
   if (!("speechSynthesis" in window)) return;
   try {
-    // Chrome-Bug: eine hängende/unvollständige Warteschlange lässt spätere
-    // speak()-Aufrufe stumm verpuffen (betrifft v.a. wiederholte Ansagen wie
-    // die 10s-Rundenzeit-Überzeit-Alarme). cancel() vor jedem speak() räumt
-    // die Warteschlange auf.
-    speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
     if (speechVoice) {
       utterance.voice = speechVoice;
     }
     speechSynthesis.speak(utterance);
-    // Zusätzlicher Bugfix: ein cancel() direkt vor einem speak() lässt die
-    // neue Utterance in manchen Browsern ohne ein nachfolgendes resume()
-    // wortlos verschwinden (nie gesprochen, kein Fehler) - resume() direkt
-    // nach speak() behebt das zuverlässig.
-    speechSynthesis.resume();
   } catch (e) {
     /* Sprachausgabe nicht verfügbar – ignorieren */
   }
@@ -315,13 +305,6 @@ function startRoundTimer(resumeState) {
       const overtime = -remaining;
       if (!roundTimerAlarmed || overtime >= roundTimerNextOvertimeAlarm) {
         roundTimerAlarmed = true;
-        // Anders als beim Bomben-Countdown läuft während der Rundenzeit-
-        // Überzeit kein durchgehender Sound (kein adaptiveBeep()) - ohne
-        // aktive Audiowiedergabe bleibt speak() auf manchen Geräten nach der
-        // ersten Ansage stumm, da der Audio-Pipeline "einschläft". Der kurze
-        // beep hält sie wach, bevor angesagt wird.
-        beep.currentTime = 0;
-        beep.play().catch(() => {});
         speak("Rundenzeit abgelaufen");
         vibrate([200, 100, 200]);
         roundTimerDisplay.classList.add("warning");
