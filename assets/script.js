@@ -161,7 +161,7 @@ function speak(text) {
     // Chrome-Bug: eine hängende/unvollständige Warteschlange lässt spätere
     // speak()-Aufrufe stumm verpuffen (betrifft v.a. wiederholte Ansagen wie
     // die 10s-Rundenzeit-Überzeit-Alarme). cancel() vor jedem speak() räumt
-    // die Warteschlange auf und behebt das zuverlässig.
+    // die Warteschlange auf.
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
@@ -169,6 +169,11 @@ function speak(text) {
       utterance.voice = speechVoice;
     }
     speechSynthesis.speak(utterance);
+    // Zusätzlicher Bugfix: ein cancel() direkt vor einem speak() lässt die
+    // neue Utterance in manchen Browsern ohne ein nachfolgendes resume()
+    // wortlos verschwinden (nie gesprochen, kein Fehler) - resume() direkt
+    // nach speak() behebt das zuverlässig.
+    speechSynthesis.resume();
   } catch (e) {
     /* Sprachausgabe nicht verfügbar – ignorieren */
   }
