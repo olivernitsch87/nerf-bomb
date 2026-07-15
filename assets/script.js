@@ -315,6 +315,13 @@ function startRoundTimer(resumeState) {
       const overtime = -remaining;
       if (!roundTimerAlarmed || overtime >= roundTimerNextOvertimeAlarm) {
         roundTimerAlarmed = true;
+        // Anders als beim Bomben-Countdown läuft während der Rundenzeit-
+        // Überzeit kein durchgehender Sound (kein adaptiveBeep()) - ohne
+        // aktive Audiowiedergabe bleibt speak() auf manchen Geräten nach der
+        // ersten Ansage stumm, da der Audio-Pipeline "einschläft". Der kurze
+        // beep hält sie wach, bevor angesagt wird.
+        beep.currentTime = 0;
+        beep.play().catch(() => {});
         speak("Rundenzeit abgelaufen");
         vibrate([200, 100, 200]);
         roundTimerDisplay.classList.add("warning");
