@@ -149,8 +149,8 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   Stoppuhr-Modus (`unbegrenzt`) speichert `{ mode: "stopwatch", startTime }`.
   `restoreRoundState()` läuft neben `restoreBombState()` beim Laden.
 - **Bei Ablauf der gesetzten Rundenzeit** (nur Countdown-Modus): Alarm
-  (`speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])` +
-  `.warning`-Klasse auf der Anzeige), der sich danach **alle 10 Sekunden
+  (kurzer `beep` + `speak("Rundenzeit abgelaufen")` + `vibrate([200,100,200])`
+  + `.warning`-Klasse auf der Anzeige), der sich danach **alle 10 Sekunden
   Überzeit wiederholt** (Schwellenwert-Variable
   `roundTimerNextOvertimeAlarm`, analog zum Schwellen-Muster der
   Bomben-Countdown-Ansage, aber aufsteigend statt absteigend). Der Timer
@@ -160,6 +160,15 @@ Build-System, kein Framework, keine npm-Abhängigkeiten. Reines HTML/CSS/Vanilla
   erneut ausgelöst (sonst würde jeder Reload während der Überzeit erneut
   ansagen) – die 10s-Wiederholung setzt aber ab dem nächsten künftigen
   Vielfachen nahtlos fort statt komplett zu pausieren.
+- **Der `beep` vor jedem `speak()`-Aufruf ist kein Cosmetic-Detail, sondern
+  Bugfix:** anders als beim Bomben-Countdown (dort hält `adaptiveBeep()` die
+  Audiowiedergabe durchgehend aktiv) lief während der Rundenzeit-Überzeit
+  zuvor **keine** Audiowiedergabe nebenher – dadurch blieb `speak()` auf
+  manchen Geräten nach der ersten Ansage stumm (die Audio-Pipeline
+  "schläft ein", wenn länger keine echte Medienwiedergabe stattfand;
+  dasselbe Grundproblem wie beim Bluetooth-Keep-Alive weiter unten, nur für
+  Sprachausgabe statt Bluetooth-Verbindung). Der kurze `beep` unmittelbar
+  vor `speak()` hält die Pipeline wach.
 - **Automatisches Beenden als Komfortfunktion** (zusätzlich zum manuellen
   Button, nicht als Ersatz): `stopRoundTimer()` wird auch in `detonate()`,
   im Entschärfen-Callback und im „Neues Spiel"-Handler aufgerufen.
